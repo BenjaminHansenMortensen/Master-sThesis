@@ -1,0 +1,24 @@
+\newcommand{\PreProcess}{\ensuremath{\mathsf{{PreProcess}}}}
+\newcommand{\Encrypt}{\ensuremath{\mathsf{{Encrypt}}}}
+\newcommand{\Permute}{\ensuremath{\mathsf{{Permute}}}}
+\newcommand{\Sort}{\ensuremath{\mathsf{{Sort}}}}
+\newcommand{\Decrypt}{\ensuremath{\mathsf{{Decrypt}}}}
+\newcommand{\Distance}{\ensuremath{\mathsf{{Distance}}}}
+\newcommand{\KeyGen}{\ensuremath{\mathsf{{KeyGen}}}}
+The general idea is to present solutions to the five algorithms $ \Filter $, $ \Search $, $ \Encode $, $ \Retrieve $ and $ \Decode $ such that they satisfy our description of privacy, correctness, adaptive, storage imbalance, access control and timely. \cref{fig:CommunicationFlow} outlines, but does not limit, the communication flow between the client and server in the five algorithms, therefore we introduce additional algorithms to realize the protocol.
+
+We do not focus on the $ \Setup $ algorithm, but we highlight that $ \Setup $ shuffles the order of the records on the database. Recall that \acrshort{pds} consists of a \acrshort{psi} protocol, to facilitate the search, combined with an \acrshort{ot} protocol, to facilitate the retrieval. We propose two \acrshort{psi} protocols that provide the functionality of a keyword search and semantic search on the database, and one \acrshort{ot} protocol that allows retrieval of records from the database. However, the two types of searches are independently realized so a \acrshort{pds} protocol might only include one, therefore, we present both as their own stand-alone protocol. Overall, the protocol is split into an initiation step of the subprotocols and a transfer step where the protocol is executed. To realize the protocol we extend the work in \cref{chap:PDS} and introduce eight new algorithms and re-introduce $ \Garble $:
+
+\begin{description}
+    \item[$ \PreProcess $] takes in the database $ D $, and outputs the set of dummy item indices $ \eta $, a permutation $ \pi \subseteq {\lbrace 1, 2, ... , n \rbrace} $ of length $ n $, encryption keys $ K $, and the encoded database $ D' $ with the files encrypted and shuffled.
+    \item[$ \Encrypt $] takes in a plaintext and encryption key of length $ \beta $, and outputs a ciphertext of length $ \beta $.
+    \item[$ \Garble $] takes in some auxiliary information $ A $, and outputs the encrypted auxiliary information $ A' $.
+    \item[$ \Permute $] takes in an array, and outputs a permutation $ \pi $ of that array.
+    \item[$ \Sort $] takes in a permutation $ \pi $, and outputs a series of indices $ i, j $ and a bit $ b $ that indicates whether the indices should be swapped or not.
+    \item[$ \Hash $] takes in some binary string and outputs a digest of length $ \beta $.
+    \item[$ \Decrypt $] takes in a ciphertext and encryption key of length $ \beta $, and outputs a plaintext of length $ \beta $.
+    \item[$ \Distance $] takes in two vectors and calculates the distance between them. 
+    \item[$ \KeyGen $] takes in no input but outputs an encryption key and other variables like IVs, nonces and counters.
+\end{description}
+
+For the sake of brevity but without the lack of generality, we abstract some detailed functionalities into a general \acrshort{mpc} description to best communicate the overall idea behind the algorithms.

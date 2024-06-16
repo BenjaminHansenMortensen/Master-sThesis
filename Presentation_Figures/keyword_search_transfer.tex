@@ -1,0 +1,81 @@
+\noindent
+\begin{figure} [H]
+    \centering
+    \captionsetup{justification=centering,margin=1cm}
+    \caption*{\hspace*{1.8cm}\textbf{\LARGE{Communication Flow}}}
+    \begin{tikzpicture}[auto,>=Triangle,font=\sffamily]
+        \node (server) {\Large Server};
+        \node[base left=8cm of server] (client) {\Large Client $ \mathcal{U} $};
+        \coordinate[below=14.79cm of server] (server_ground);
+        \coordinate[below=14.79cm of client] (client_ground);
+        
+        \begin{scope}[line width=3pt,shift={(client_ground)},
+            nodes={above}, draw=dark_gray, x={($(server_ground)-(client_ground)$)},y={($(client.south)-(client_ground)$)}]
+            
+            \draw[] (0, 0.9) node (filter) {$ I_i \gets \Search \left( A', q \right) $};
+
+            \draw[line width=1pt, light_gray] (0.5, 1) -- (0.5, 0.85);
+
+            \draw[-, line width=2pt, shorten <=2pt, black] (1.2, 0.825) -- (-0.2, 0.825);
+
+            \draw[] (0.5, 0.75) node (title_garble) {\Large{$ \Search $:}};
+            
+            \draw[] (1, 0.675) node (filter) {$ \left( e_1, e_ 2, ... , e_\aleph \right) $};
+            \draw[ultra thick, -{Stealth[scale=1]}] (filter) -- (0.7, 0.65);
+            \draw[] (0, 0.675) node (q) { $ q'_i \gets \Hash \left( q_i \right) $};
+            \draw[ultra thick, -{Stealth[scale=1]}] (q) -- (0.3, 0.65);
+
+            \draw[ultra thick, -] (0.1, 0.625) -- (0.9, 0.625);
+            \draw[ultra thick, -] (0.1, 0.625) -- (0.1, 0.4);
+            \draw[ultra thick, -] (0.9, 0.625) -- (0.9, 0.4);
+            \draw[ultra thick, -] (0.1, 0.4) -- (0.9, 0.4);
+
+            \draw[] (0.5, 0.55) node {\large \underline{MPC:}};
+
+            \draw[] (0.5, 0.5) node (encrypt1) {$ q_{i, e_1} \gets \Encrypt \left( q'_i, e_1 \right) $};
+            \draw[] (0.5, 0.47) node (encrypt2) {$ q_{i, e_2} \gets \Encrypt \left( q'_i, e_2 \right) $};
+            \draw[] (0.5, 0.44) node (encrypt2) {$ \vdots $};
+            \draw[] (0.5, 0.41) node (encrypt2) {$ q_{i, e_\aleph} \gets \Encrypt \left( q'_i, e_\aleph \right) $};
+
+            \draw[] (0, 0.3) node (q) {$ \left( q_{i, e_1}, q_{i, e_2}, \dots, q_{i, e_\aleph} \right) $};
+            \draw[ultra thick, -{Stealth[scale=1]}] (0.3, 0.375) -- (q);
+
+            \node [shape=rectangle, align=center](table1) at (0.5, -0.055) {
+                \begin{tabular}{|c | c | c | c|}
+
+                    \multicolumn{1}{c}{ \hspace*{1ex} \phantom{$ e_1 $} \hspace*{1ex}} & \multicolumn{1}{c}{$ q'_{i,e_2} $} & \multicolumn{1}{c}{\dots} & \multicolumn{1}{c}{ $ q'_{i,e_\aleph} $} \\ [1ex] 
+                    
+                    \hline \rule{0pt}{1.2\normalbaselineskip}
+                    $ v'_1 $ & $ \left[ \iota'_{1, 1}, \iota'_{1, 2}, \dots , \iota'_{1, k}  \right] $ & $ \dots $ & $ x'_1 $\\ [1ex]
+                    \hline \rule{0pt}{1.2\normalbaselineskip}
+                    $ v'_2 $ & $ \left[ \iota'_{2, 1}, \iota'_{2, 2}, \dots , \iota'_{2, l}  \right] $ & $ \dots $ & $ x'_2 $ \\ [1ex]
+                    \hline \rule{0pt}{1.2\normalbaselineskip}
+                    $ \dots $ & $ \dots $ & $ \dots $ & $ \dots $ \\ [1ex]
+                    \hline \rule{0pt}{1.2\normalbaselineskip}
+                    $ v'_{\gimel} $ & $ \left[ \iota'_{\gimel, 1}, \iota'_{\gimel, 2}, \dots , \iota'_{\gimel, o}  \right] $ & $ \dots $ & $ x'_\gimel $ \\ [1ex] 
+                    \hline
+                \end{tabular}
+            };
+
+            \draw[] (0.02, 0.2) node (title_key) {$\begin{tabular}{l}
+                Decryption Keys \hspace*{1.3cm}
+                \end{tabular}\bm{\Big\{}$
+            };
+            \draw[] (0, 0.06) node (find_q) {\Large{$ q_{i,e_1} \overset{{\scriptscriptstyle?}}{\rightarrow} $}};
+
+            \draw[] (0.08, -0.06) node (title_key) {$\left.\begin{tabular}{l}
+                \\
+                \\
+                \\
+                \\
+                \\
+                \\
+                \\
+                \\
+                \end{tabular}\right\{$
+            };
+
+        \end{scope}
+    \end{tikzpicture}
+    \label{ill:KeywordSearchTransfer}
+\end{figure}

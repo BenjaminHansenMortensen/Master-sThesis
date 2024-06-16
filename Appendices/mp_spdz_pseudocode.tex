@@ -1,0 +1,73 @@
+\section*{Appendix B: Proof of concept $ \Search $ and $ \Retrieve $}
+\addcontentsline{toc}{chapter}{Appendix B}
+\label{apx:proofofconceptSearchRetrieve}
+
+The implementation of the combination of  $ \Search $ and $ \Retrieve $ in MP-SPDZ in the proof of concept program.
+
+\hfill
+
+\RestyleAlgo{ruled}
+\begin{algorithm}[H]
+    \LinesNumbered
+    \label{algo:RetrieveAndSearch}
+    \caption{Proof of concept - MP-SPDZ - $ \Search $ \& $ \Retrieve $}
+    \KwIn{Search query $ q' \gets \Hash \left( q \right) $}
+    \KwIn{Database
+        \begin{equation*}
+            D \gets
+            \begin{bmatrix} 
+                & 1 & R^{\mathrm{chars}}_{1, 1} & R^{\mathrm{chars}}_{1, 2} & \dots & R^{\mathrm{chars}}_{1, \omega} \\
+                & 2 & R^{\mathrm{chars}}_{2, 1} & R^{\mathrm{chars}}_{2, 2} & \dots & R^{\mathrm{chars}}_{2, \omega} \\
+                & \vdots & \vdots & \vdots & \ddots & \vdots \\
+                & m & R^{\mathrm{chars}}_{m, 1} & R^{\mathrm{chars}}_{m, 2} & \dots & R^{\mathrm{chars}}_{m, \omega} 
+            \end{bmatrix}
+        \end{equation*}
+        }
+    \KwIn{Auxiliary information
+        \begin{equation*}
+            A \gets
+            \begin{bmatrix} 
+                & 1 & R^{digests}_{1, 1} & R^{digests}_{1, 2} & \dots & R^{digests}_{1, \sigma} \\
+                & 2 & R^{digests}_{2, 1} & R^{digests}_{2, 2} & \dots & R^{digests}_{2, \sigma} \\
+                & \vdots & \vdots & \vdots & \ddots & \vdots \\
+                & m & R^{digests}_{m, 1} & R^{digests}_{m, 2} & \dots & R^{digests}_{m, \sigma} 
+            \end{bmatrix}
+        \end{equation*}
+        }
+    \KwOut{Retrieved records $ \Vec{D} $}
+
+    \begin{equation*}
+        \hspace*{-7cm}
+        I \gets
+        \begin{bmatrix}
+            0 & 0 & \dots & 0
+        \end{bmatrix}
+        \text{of size } m
+    \end{equation*}
+
+    \For{$ i \in \lbrace 1, 2, \dots , m \rbrace $}{
+        \For{$ j \in \lbrace 2, 3, \dots , \sigma + 1 \rbrace $}{
+            $ I_i \gets I_i + A_{i, 1} \cdot \left( q' = A_{i, j} \right) \cdot \left(I_i = 0\right) $
+        }
+    }
+    
+    \begin{equation*}
+        \hspace*{-5.65cm}
+        \Vec{D} \gets
+        \begin{bmatrix} 
+            & 0 & 0 & \dots & 0 \\
+            & 0 & 0 & \dots & 0 \\
+            & \vdots & \vdots & \ddots & \vdots \\
+            & 0 & 0 & \dots & 0 
+        \end{bmatrix}
+        \text{of size } m \times \omega
+    \end{equation*}
+
+    \For {$ i \in \lbrace 1, 2, \dots , m \rbrace $} {
+        \For{$ j \in \lbrace 2, 3, \dots , \omega + 1 \rbrace $}{
+            $ \Vec{D}_{i, j - 1} \gets D_{i, j} \cdot \left( I_i = D_{i, 1} \right) $
+        }
+    }
+
+    \KwRet{$ \Vec{D} $}
+\end{algorithm}

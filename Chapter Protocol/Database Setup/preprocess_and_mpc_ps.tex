@@ -1,0 +1,313 @@
+\newcommand{\CTR}{\ensuremath{\mathsf{{CTR}}}}
+\refstepcounter{subsection}\subsection*{\thesubsection\quad The $ \PreProcess $ algorithm}\label{subsec:PreProcessAlgorithm}
+
+To pad each record is important as the length of a record could work as a direct identifier even if it is encrypted. We use the same idea as in the proof of concept to pad the records; we settle for an upper bound $ \omega $, which is the maximal length of any possible record $ R^{\mathrm{chars}}_{\iota} $. We then pad all records such that they are of length $ \omega $. Later in the transfer step, we must make valid retrievals of "empty" records, therefore, we fill the database with dummy records $ d_i $ of length $ \omega $. We add the dummy records after the records such that the database from index $ 1 $ to $ m $ consists of records $ R_{\iota} $, and from $ m + 1 $ to $ n $ consists of dummy records. The number of dummy records added will later determine how many transfers $ k $ can be made. This way of adding the dummy records allows the client to infer their location implicitly by the server sending it the length of the database $ n $ and the number of records $ m $.
+
+\hfill
+
+\RestyleAlgo{ruled}
+\begin{algorithm}[H]
+    \LinesNumbered
+    \caption{Server - Padding the Database}
+    \label{algo:DatabasePadding}
+    \KwIn{Database $ D \gets \left[
+            R^{\mathrm{chars}}_1, 
+            R^{\mathrm{chars}}_2, 
+            ... , 
+            R^{\mathrm{chars}}_m
+        \right]  $}
+    \KwOut{Database $ D' \gets \left[
+        R'_1, 
+        R'_2, 
+        ... , 
+        R'_m,
+        d_1,
+        d_2,
+        ... ,
+        d_{n - m}
+    \right]  $}
+
+    \vspace*{0.48cm}
+
+    $ D' \gets \left[ \phantom{=}\right] $
+
+    \For{$ R^{\mathrm{chars}}_{\iota} \mathrm{\phantom{|} in \phantom{|}} D $}{
+        
+        $ R'_i \gets R^{\mathrm{chars}}_{\iota} $.padToLength$ \left(\omega\right)$
+
+        $ D' $.append$\left( R'_i \right)$
+
+    }
+
+    \For {$ i \in \lbrace 1, 2, ... , n - m \rbrace $} {
+        
+        $ D' $.append$ \left( d_i \right) $
+
+    }
+
+    \vspace*{0.48cm}
+
+    \KwRet{$ D' $}
+\end{algorithm}
+
+\clearpage
+
+We now have a database with records and dummy records that the client wants to shuffle. The client uses an oblivious sort algorithm $ \Sort $ to sort the database $ D' $ after some random permutation $ \pi $ of length $ n $. For simplicity, we say that the sorting algorithm considers two and two records at a time, denote with $ i, j, b \gets \Sort $, where $ i, j \in \lbrace 1, 2, ... , n \rbrace $ are indices of the records and $ b \in \lbrace 0, 1 \rbrace $ is a bit to signal whether to swap or not. The challenge is how the client can request records $ R_i $ and $ R_j $, encrypting and potentially swap them without learning the records. This might seem like a simple problem at first, as the server could mask the records before sending them away, but how is the server supposed to unmask them without the client revealing which mask goes with which record? In this sense, we need an oblivious swapping algorithm combined with two-way masking of the records, which brings us to the notion of private swap.
+
+\hfill
+
+\noindent
+\begin{figure}[H]
+    \begin{minipage}{0.5\textwidth}
+        \RestyleAlgo{ruled}
+        \begin{algorithm}[H]
+            \LinesNumbered
+            \caption{Client $ \mathcal{U} $ - \newline $ \PreProcess $}
+            \label{algo:ClientPreProcess}
+            \KwIn{\phantom{$ D' $}}
+            
+            \vspace*{0.48cm}
+    
+            \KwOut{Permutation $ \pi $}
+            \KwOut{Dummy indices $ \eta $}
+            \KwOut{Keys $ K $}
+    
+            \vspace*{0.48cm}
+    
+            $ K \gets \left[ \phantom{=} \right] $ 
+    
+            receive $ \left(m, n\right) $
+    
+            $ \eta \gets \left[ m + 1, m + 2, ... , n \right] $
+        
+            $ \pi \gets \Permute \left( \left[ 1, 2, ... , n \right] \right) $
+    
+            \For{$ i, j, b \mathrm{\phantom{|} in \phantom{|}} \Sort \left( \pi \right) $}{
+                
+                send $ \left( i, j \right) $
+    
+                \SetKwProg{PS}{private swap:}{}{end}
+                \PS{}{
+    
+                    \KwIn{$ K, i, j, b $ \phantom{$ D'_i, D'_j $}}
+    
+                    \KwOut{\phantom{$ C_i, C_j $}}
+    
+                }
+    
+                \phantom{$ D'_i $}
+    
+                \phantom{$ D'_j $}
+            }
+    
+            \vspace*{0.48cm}
+        
+            \KwRet{$ \pi, \eta, K $}
+    
+        \end{algorithm}
+    \end{minipage}
+    \begin{minipage}{0.49\textwidth}
+        \RestyleAlgo{ruled}
+        \begin{algorithm}[H]
+            \LinesNumbered
+            \caption{Server - \newline $ \PreProcess $}
+            \label{algo:ServerPreProcess}
+            \KwIn{Database $ D' \gets $ \newline $ \left[ R'_1, ... R'_m, d_1, ... , d_{n - m} \right] $}
+            \KwOut{Database $ D' $}
+    
+            \vspace*{0.48cm}
+    
+            \vspace*{0.48cm}
+    
+            \vspace*{0.48cm}
+    
+            \phantom{$ K \gets \left[ \phantom{=} \right] $}
+    
+            send $ \left(m, n\right) $ 
+    
+            \phantom{$ \eta \gets \left[ m + 1, ... , n \right] $}
+    
+            \phantom{$ \pi \gets \Permute \left( \left[ 1, 2, ... , n \right] \right) $}
+    
+            \While{$\mathrm{sorting}$}{
+    
+                receive $ \left( i, j \right) $
+       
+                \SetKwProg{PS}{private swap:}{}{end}
+                \PS{}{
+        
+                    \KwIn{$ D'_i, D'_j $}
+        
+                    \KwOut{$ C_i, C_j $}
+        
+                }
+    
+                $ D'_i \gets C_i $
+    
+                $ D'_j \gets C_j $
+            }
+    
+            \vspace*{0.48cm}
+    
+            \KwRet{$ D' $}
+    
+        \end{algorithm}
+    \end{minipage}
+\end{figure}
+
+We implement the $ \PreProcess $ algorithm by combining $ \Sort $ and \acrshort{ps}, detailed in \cref{algo:ClientPreProcess} and \cref{algo:ServerPreProcess}. In $ \PreProcess $, the client to control when records are swapped and provides the keys used for encryption. At the end, we have the encrypted records in a random order. This leaves the client with the later possibility of asking the server for ciphertexts and decrypting them, so the server does not learn which records are retrieved. The algorithm starts with the server sending the client the number of records $ m $ and the database size $ n $. The client then derives the indices of the dummy records $ \eta \gets \left[ m + 1, ... , n - 1, n \right]  $ and gets a random permutation $ \pi $ from $ \Permute $. It then uses the permutation as the element to be sorted; the client gets two indices $ i, j $, and a bit $ b $ for each comparison of records. $ i $ and $ j $ are sent to the server to retrieve the elements $ D'_i $ and $ D'_j $ from the database. The client then provides a set of encryption keys $ K $, indices $ i $ and $ j $ together with the swap indicator $ b $ to the \acrshort{ps} protocol, and the server receives the ciphertexts $ C_i $ and $ C_j $, which are its inputs encrypted and potentially swapped by the client. In the protocol, the client stores the keys in $ K $ at the location of $ i $ and $ j $, effectively replacing old key pairs if present. After the private swap the server updates the element in $ D'_i $ and $ D'_j $ with the new ciphertexts $ C_i $ and $ C_j $. Once the sorting is complete, the client stores $ \pi $, $ \eta $, and $ K $, and the server receives $ D' $.
+
+
+\refstepcounter{subsection}\subsection*{\thesubsection\quad Generic MPC-based Private Swap Protocol}\label{subsec:MPCPSProtocol}
+
+\newcommand{\AND}{\ensuremath{\mathsf{{AND}}}}
+\newcommand{\XOR}{\ensuremath{\mathsf{{XOR}}}}
+\newcommand{\NOT}{\ensuremath{\mathsf{{NOT}}}}
+An efficient \acrshort{ps} protocol can be realized using the $ \Encrypt $ algorithm in counter mode \acrshort{ctr} in combination with generic \acrshort{mpc}. On one side, the client pre-produce the key stream $ s_i $ outside the secure computation, and on the other the server supplies the record. We use generic \acrshort{mpc}, to combine the key stream with the record without revealing either input to the other party, giving us an \acrshort{oprf} and boiling the encryption part of the protocol down to \acrshort{xor} operations. For the swap we recall that an if-else statement is describable as $ b \cdot x + \left( b - 1 \right) \cdot y $, for statement $ b \in \mathbb{F}_2 $, and outcomes $ x \in \mathbb{F}_{2^z} $ and $ y \in \mathbb{F}_{2^z} $. $ \AND $ is equivalent to multiplication, $ \XOR $ to addition and $ \NOT $ to subtraction over a Galois field, which we use to transform the expression into a set of logic gate operations.
+
+\begin{gather*}
+    P_i \gets \XOR \left( C_i, s'_i \right) \\
+    P_j \gets \XOR \left( C_j, s'_j \right) \\
+    R_i \gets \XOR \left(\AND \left( P_j, b \right), \AND \left( P_i, \NOT \left( b \right) \right)\right) \\
+    R_j \gets \XOR \left(\AND \left( P_i, b \right), \AND \left( P_j, \NOT \left( b \right) \right)\right) \\
+    C_i \gets \XOR \left( R_i, s_i \right) \\
+    C_j \gets \XOR \left( R_j, s_j \right)
+\end{gather*}
+
+In the later rounds of the sorting the client might need to decrypt the records before encrypting them, this is achieved by adding another set of $ \XOR $ gates where the client can supply the decryption key streams $ s'_i $ and $ s'_j $. If the client does not need to decrypt the record it simply supplies an all-zero key stream. Combining the if-else statement and the re-encryption gates we derive the following equations, where every bit in $ P_1 $ and $ P_2 $ are evaluated against $ b $:
+
+We use the equations to describe the computation in our \acrshort{ps} protocol as a binary circuit $ \mathcal{C} $, which is executed in generic \acrshort{mpc}. For deriving keys and counters, we assume the existence of a \acrshort{ppt} algorithm $ \KeyGen $. We use these new keys $ e $ and counters $ c $, produced from $ \KeyGen $, combined with $ \Encrypt $ in \acrfull{ctr} mode, $ \CTR $-$ \Encrypt $, to produce key streams. All this together gives us a compact \acrshort{ps} protocol, \cref{algo:ClientBooleanPS} and \cref{algo:ServerBooleanPS}.
+
+\noindent
+\begin{figure} [H]
+    \begin{minipage}{0.5\textwidth}
+        \RestyleAlgo{ruled}
+        \begin{algorithm}[H]
+            \LinesNumbered
+            \caption{Client $ \mathcal{U} $ - \newline Generic MPC-based Private Swap}
+            \label{algo:ClientBooleanPS}
+            \KwIn{$ K, i, j, b $}
+    
+            \KwOut{\phantom{$ C_i, C_j $}}
+    
+            \vspace*{0.48cm}
+    
+            \eIf{$ i \mathrm{\phantom{|} in \phantom{|}} K $}{
+    
+                $ e_i, c_i \gets K $.get$ \left( i \right) $
+    
+                $ s'_i \gets \CTR $-$ \Encrypt \left( e_i, c_i \right) $
+    
+            }{
+                $ s'_i \gets {\lbrace 0 \rbrace}^\omega $
+            }
+    
+            \eIf{$ j \mathrm{\phantom{|} in \phantom{|}} K $}{
+    
+                $ e_j, c_j \gets K $.get$ \left( j \right) $
+    
+                $ s'_j \gets \CTR $-$ \Encrypt \left( e_j, c_j \right) $
+    
+            }{
+                $ s'_j \gets {\lbrace 0 \rbrace}^\omega $
+            }
+    
+            $ e_i, c_i \gets \KeyGen \left(\right) $
+    
+            $ e_j, c_j \gets \KeyGen \left(\right) $
+    
+            $ s_i \gets \CTR $-$ \Encrypt \left( e_i, c_i \right) $
+    
+            $ s_j \gets \CTR $-$ \Encrypt \left( e_j, c_j \right) $
+    
+            \SetKwProg{MPC}{multi-party computation}{}{end}
+            \MPC{} {
+    
+                \KwIn{$ b, s'_i, s'_j, s_i, s_j $}
+    
+                \KwOut{\phantom{$ C_i, C_j $}}
+    
+                \vspace*{0.48cm}
+    
+                $ \mathcal{C}\left( b, s'_i, s'_j, s_i, s_j \right) $
+    
+            }
+    
+            $ K $.update$ \left( i \right) $.with$ \left( e_i, c_i \right) $
+    
+            $ K $.update$ \left( j \right) $.with$ \left( e_j, c_j \right) $
+    
+            \vspace*{0.48cm}
+    
+            \KwRet{}
+    
+        \end{algorithm}
+    \end{minipage}
+    \begin{minipage}{0.49\textwidth}
+        \RestyleAlgo{ruled}
+        \begin{algorithm}[H]
+            \LinesNumbered
+            \caption{Server - \newline Generic \acrshort{mpc}-based Private Swap}
+            \label{algo:ServerBooleanPS}
+            \KwIn{$ D'_i, D'_j $}
+        
+            \KwOut{$ C_i, C_j $}
+    
+            \vspace*{0.48cm}
+    
+            \phantom{$ i \mathrm{\phantom{|} in \phantom{|}} K $}
+    
+            \phantom{$ e_i, c_i \gets K $.get$ \left( i \right) $}
+    
+            \phantom{$ s'_i \gets \CTR $-$ \Encrypt \left( e_i, c_i \right) $}
+    
+            \hfill
+    
+            \phantom{$ s'_i \gets {\lbrace 0 \rbrace}^\omega $}
+    
+            \hfill
+    
+            \phantom{$ j \mathrm{\phantom{|} in \phantom{|}} K $}
+    
+            \phantom{$ e_j, c_j \gets K $.get$ \left( j \right) $}
+    
+            \phantom{$ s'_j \gets \CTR $-$ \Encrypt \left( e_j, c_j \right) $}
+    
+            \hfill
+    
+            \phantom{$ s'_j \gets {\lbrace 0 \rbrace}^\omega $}
+    
+            \hfill
+    
+            \phantom{$ e_i, c_i \gets \KeyGen \left(\right) $}
+    
+            \phantom{$ e_j, c_j \gets \KeyGen \left(\right) $}
+    
+            \phantom{$ s_i \gets \CTR $-$ \Encrypt \left( e_i, c_i \right) $}
+    
+            \phantom{$ s_j \gets \CTR $-$ \Encrypt \left( e_j, c_j \right) $}
+    
+            \SetKwProg{MPC}{multi-party computation}{}{end}
+            \MPC{} {
+    
+                \KwIn{$ D'_i, D'_j $}
+            
+                \KwOut{$ C_i, C_j $}
+    
+                \vspace*{0.48cm}
+    
+                $ C_i, C_j \gets \mathcal{C}\left( D'_i, D'_j \right) $
+    
+            }
+    
+            \phantom{$ K $.update$ \left( j \right) $.with$ \left( e_j, c_j \right) $}
+    
+            \phantom{$ K $.update$ \left( j \right) $.with$ \left( e_j, c_j \right) $}
+    
+            \vspace*{0.48cm}
+    
+            \KwRet{$ C_i, C_j $}
+    
+        \end{algorithm}
+    \end{minipage}
+\end{figure}

@@ -1,0 +1,81 @@
+\section{What is a Database Search Protocol?}
+\label{sec:PDSwhatisaDSprotocol}
+%\addcontentsline{toc}{section}{What is a database searching protocol?}
+
+
+\newcommand{\Setup}{\ensuremath{\mathsf{{Setup}}}}
+\newcommand{\Filter}{\ensuremath{\mathsf{{Filter}}}}
+\newcommand{\Search}{\ensuremath{\mathsf{{Search}}}}
+\newcommand{\Encode}{\ensuremath{\mathsf{{Encode}}}}
+\newcommand{\Retrieve}{\ensuremath{\mathsf{{Retrieve}}}}
+\newcommand{\Decode}{\ensuremath{\mathsf{{Decode}}}}
+
+A database search protocol consists of six main \acrfull{ppt} algorithms:
+\begin{description}
+    \item[$ \Setup $] takes the single database $ D $, of length $ n \in \mathbb{Z}^+ $, with $ m \in \mathbb{Z}^+ $ number of records, as an input, and outputs a set of system parameters $ \Xi $. The system parameters $ \Xi $ is a tuple which can contain variables such as a certificate, IP-address, domain name, database length and so on.
+    \item[$ \Filter $] take the database $ D $ and client's identity $ \mathcal{U} $ as inputs, and outputs some auxiliary information $ A \in {\lbrace 0, 1 \rbrace}^\rho $, of length $ \rho $, about the database.
+    \item[$ \Search $] takes the search query $ q \in {\lbrace 0, 1 \rbrace}^\chi $, of length $ \chi $, and $ A $ as inputs, and outputs a set of indices $ I \subseteq {\lbrace 1, 2, ... , n \rbrace} $, of length $ \nu \in \mathbb{Z}^+ $.
+    \item[$ \Encode $] takes the indices $ I $ as an input, and outputs the encoded indices $ I' \subseteq {\lbrace 1, 2, ... , n \rbrace} $ of length $ \sigma \in \mathbb{Z}^+ $.
+    \item[$ \Retrieve $] takes $ D $ and $ I' $ as inputs, and outputs the set $ F' $ of encoded records.
+    \item[$ \Decode $] takes the encoded records $ F' $ as an input, and outputs the retrieved records $ F \subseteq D $.
+\end{description}
+
+The server starts with running $ \Setup \left( D \right) $ and $ \Filter \left( \mathcal{U}, D \right) $, then it sends $ \Xi $ and $ A $ to the client. From here on out, it performs $ k \in \mathbb{Z}^+ $ instances of transfers. The client picks a value for $ q_i $ then runs $ \Search \left( A, q_i \right) $ to get the indices $ I_i $. Next, the client constructs the encoded indices $ I'_i $, by running $ \Encode \left( I_i \right) $, and sends it to the server. The server responds by sending back the encoded records $ F'_i $ by running, $ \Retrieve \left( D, I'_i \right) $. Finally, the client retrieves the records $ F_i $, by running $ \Decode \left( F'_i \right) $, it was searching for. The client can halt or continue to do another search by performing a new instance of a transfer. 
+
+\begin{figure} [tbh]
+    \centering
+    \begin{tikzpicture}[auto,>=Triangle,font=\sffamily]
+        \node (server) {\Large Server};
+        \node[base left=4cm  of server] (client) {\Large Client $ \mathcal{U} $};
+        \coordinate[below=8cm of server] (server_ground);
+        \coordinate[below=8cm of client] (client_ground);
+        
+        \begin{scope}[line width=3pt,shift={(client_ground)},
+            nodes={above}, draw=dark_gray, x={($(server_ground)-(client_ground)$)},y={($(client.south)-(client_ground)$)}]
+            \draw[] (1, 0.9) node (setup) {$ \Xi \gets \Setup \left( D \right) $};
+            \draw[] (0, 0.9) node (setup_receive) {\phantom{$ \left( A \right) $}};
+            \draw[ultra thick, -{Stealth[scale=1]}] (setup) -- (setup_receive);
+
+            \draw[] (1, 0.825) node (filter) {$ A \gets \Filter \left( \mathcal{U} D \right) $};
+            \draw[] (0, 0.825) node (filter_receive) {\phantom{$ \left( A \right) $}};
+            \draw[ultra thick, -{Stealth[scale=1]}] (filter) -- (filter_receive);
+
+            \draw[] (0, 0.75) node (search) {$ I_1 \gets \Search \left( A, q_1 \right) $};
+            \draw[] (1, 0.75) node (search_receive) {\phantom{$ \left( A \right) $}};
+
+            \draw[] (0, 0.675) node (encode) {$ I'_1 \gets \Encode \left( I_1 \right) $};
+            \draw[] (1, 0.675) node (encode_receive) {\phantom{$ \left( A \right) $}};
+            \draw[ultra thick, -{Stealth[scale=1]}] (encode) -- (encode_receive);
+
+            \draw[] (1, 0.6) node (retrieve) {$ F'_1 \gets \Retrieve \left( D, I'_1 \right) $};
+            \draw[] (0, 0.6) node (retrieve_receive) {\phantom{$ \left( A \right) $}};
+            \draw[ultra thick, -{Stealth[scale=1]}] (retrieve) -- (retrieve_receive);
+
+            \draw[] (0, 0.525) node (decode) {$ F_1 \gets \Decode \left( F'_1 \right) $};
+            \draw[] (1, 0.525) node (decode_receive) {\phantom{$ \left( A \right) $}};
+
+            \draw[line width=1pt, light_gray] (0.5, 1) -- (0.5, 0.525);
+            \draw[-,Dotted=8,line width=2pt, shorten <=2pt, light_gray] (0.5, 0.5) -- (0.5, 0.425);
+            \draw[line width=1pt, light_gray] (0.5, 0.4) -- (0.5, 0.1);
+
+            \draw[] (0, 0.325) node (search_k) {$ I_k \gets \Search \left( A, q_k \right) $};
+            \draw[] (1, 0.325) node (search_k_receive) {\phantom{$ \left( A \right) $}};
+
+            \draw[] (0, 0.25) node (encode_k) {$ I'_k \gets \Encode \left( I_k \right) $};
+            \draw[] (1, 0.25) node (encode_k_receive) {\phantom{$ \left( A \right) $}};
+            \draw[ultra thick, -{Stealth[scale=1]}] (encode_k) -- (encode_k_receive);
+
+            \draw[] (1, 0.175) node (retrieve_k) {$ F'_k \gets \Retrieve \left( D, I'_k \right) $};
+            \draw[] (0, 0.175) node (retrieve_k_receive) {\phantom{$ \left( A \right) $}};
+            \draw[ultra thick, -{Stealth[scale=1]}] (retrieve_k) -- (retrieve_k_receive);
+
+            \draw[] (0, 0.1) node (decode_k) {$ F_k \gets \Decode \left( F'_k \right) $};
+            \draw[] (1, 0.1) node (decode_k_receive) {\phantom{$ \left( A \right) $}};
+        \end{scope}
+    \end{tikzpicture}
+    \captionsetup{justification=centering,margin=1cm}
+    \caption{The communication flow between the client and the server in a database search protocol.}
+    \label{fig:CommunicationFlow}
+\end{figure}
+
+We are not going into greater detail about the $ \Setup $ algorithm. On the other hand, we discuss the remaining algorithms in great detail, as with these and some additional ones, is where we will transform the protocol.

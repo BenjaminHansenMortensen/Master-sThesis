@@ -1,0 +1,45 @@
+\refstepcounter{subsection}\subsection*{\thesubsection\quad Initiation}\label{subsec:SemanticSearchInitiation}
+
+
+To begin, the server use some \acrshort{llm} $ \Gamma $ to create vector embeddings of each record. $ \Gamma $ takes the values of a record $ R^{\mathrm{values}}_{\iota} $ as input and outputs a vector $ \gamma_{\iota} $. We pair the vectors with the index of the record they embed, $ \left(\gamma_{\iota}, \iota \right) $, to form an indexing $ A $. To satisfy the access control policy of the client's identity, $ \mathcal{U} $, the values in the records are filtered. This is done by creating a new copy of the record $ {R'}^{\mathrm{values}}_{\iota} $ where we add all the allowed values by the access control. Then, the copy of the record is feed into the LLM to produce a vector embedding that captures intended searchable semantics of the record.
+
+\RestyleAlgo{ruled}
+\begin{algorithm} [H]
+    \LinesNumbered
+    \caption{Server - $ \Filter $}
+    \label{algo:SemanticFilter}
+    \KwIn{Client's Identity $ \mathcal{U} $}
+    \KwIn{Database $ D \gets \left[
+            R^{\mathrm{values}}_1, 
+            R^{\mathrm{values}}_2, 
+            ... , 
+            R^{\mathrm{values}}_m
+        \right]  $}
+    \KwIn{Large Language Model $ \Gamma $}
+    \KwOut{Auxiliary information $ A $}
+
+    \vspace*{0.48cm}
+
+    $ A \gets \left[ \phantom{=}\right] $
+
+    \For{$ R^{\mathrm{values}}_{\iota} \mathrm{\phantom{|} in \phantom{|}} D $}{
+
+        $ {R'}^{\mathrm{values}}_{\iota} \gets \left[ \phantom{=}\right] $ 
+        
+        \For{$ v_j \mathrm{\phantom{|} in \phantom{|}} R^{\mathrm{values}}_{\iota} $}{
+
+            \If{$ v_j \mathrm{\phantom{|} allowed \phantom{|} by \phantom{|} \mathcal{U}} $}{
+                $ {R'}^{\mathrm{values}}_{\iota} $.add$ \left( v_j \right)$
+            }
+        } 
+        
+        $ \gamma_\iota \gets \Gamma \left( {R'}^{\mathrm{values}}_{\iota} \right) $
+
+        $ A $.add$ \left(\gamma_\iota, \iota \right) $
+
+    }
+
+    \vspace*{0.48cm}
+
+    \KwRet{$ A $}
+\end{algorithm}

@@ -1,0 +1,77 @@
+\section{Multi-Party Computation}
+\label{sec:mpc}
+%\addcontentsline{toc}{section}{Multi-party computation}
+
+\acrshort{mpc} is cited to the works of Andrew Yao \cite{FOCS:Yao86, STOC:GolMicWig87} on his idea of garbled circuits. At a high level of abstraction, it allows a set of parties to privately compute a function based on their inputs without revealing the function computed or the other parties' inputs. The function's output can be revealed to selected parties. Along with Yao's work, the work of Michael Ben-Or, Shafi Goldwasser, and Avi Wigderson \cite{STOC:BenGolWig88} is cited as fundamental to \acrshort{mpc} as it gives theorems on the thresholds of parties that can be corrupted while an arithmetic function still can be computed with perfect security. In the same paper, they present the BGW protocol that utilizes linear secret sharing \cite{TCC:KomNaoYog16}, which is notable as it differs from Yao's approach. Since their work, there have been many optimizations and new protocols, such as the SPDZ protocol \cite{EPRINT:DPSZ11} that uses \acrfull{she} in the preprocessing for a faster online phase. However, fundamentally, most protocols use binary and arithmetic circuits to represent the function that is computed \cite{STOC:Gentry09, CCS:KelOrsSch16, C:GLOPS21, EC:KelPasRot18}. It is essential to highlight that these protocols are referred to as generic \acrshort{mpc} protocols due to their ability to compute any function, so specific \acrshort{mpc} protocols might not utilize a circuit approach due to their limitations.
+
+Because \acrshort{mpc} facilitates the secure computation of a function between a set of parties, it is also essential to protect against different adversarial behaviors that one or more parties might exhibit. There are three main adversarial models: semi-honest, covert, and malicious, but the literature mainly focuses on semi-honest and malicious. Semi-honest adversaries supply the correct inputs to the protocol and do not deviate from the protocol description in any way. They try to break the protocol by passively using the information they learn throughout the execution to learn more about the computation and secret values. Protection against this behavior becomes tricky in a setting with multiple semi-honest adversaries as the adversaries could cooperate and combine secret values to try to break the protocol.
+
+All in all, the general security idea behind a protocol that has protection against semi-honest adversaries is that it leaks no information. On the other hand, malicious adversaries are actively trying any strategy to break the protocol. They could give false inputs, manipulate values, or halt the computation; anything goes. Protection against malicious adversaries is often more costly than protection against semi-honest adversaries. In addition to the type of adversaries we are dealing with in \acrshort{mpc}, we must also consider the number of corrupt parties. Generally, we use the terms honest-majority and dishonest-majority to indicate if the corrupted parties are a minority or a majority in the computation. Notably, the majority implies a strictly greater than relation.
+
+Preliminarily, \acrshort{mpc} assumes that the involved parties already are authenticated to one another and that they have established a secure channel for communication. Contrary to secure communication, which deals with adversaries listening in on their communication, in \acrshort{mpc}, the adversaries reside as an active party. The \acrshort{mpc} paradigm is a set of protocols, which, in their ideal sense, is like having a mutually trusted third party that would collect all the inputs and compute the function for us. \acrshort{mpc} is, therefore, useful in cases where no such mutually trusted third party exists, which makes it great for validating and mitigating certain types of behavior of the involved parties.
+
+To ensure we understand generic \acrshort{mpc}, let us examine Yao's garbled circuits. We consider a two-party setting with semi-honest adversaries. A garbled circuit is a binary circuit representation of the function we want to compute where we garble each gate. It suffices to understand how one gate works to understand how it all fits together, so to understand what we mean by a garbled gate, let us consider the logic gate $ g_i $; for simplicity, imagine that $ g_i $ is an \acrfull{xor} gate. \cref{Tab:XORgate} shows the truth table for the gate, with wires $ w_0 $ and $ w_1 $ being the inputs to the gate and $ w_2 $ being the output wire.
+
+\begin{center}
+    \begin{table}[tbh]
+        \centering
+        \begin{threeparttable}
+            \begin{tabular}{|c | c | c|} 
+            \hline
+            input $w_0$ & input $w_1$ & output $w_2$ \\ [0.5ex] 
+            \hline\hline
+            0 & 0 & 0 \\ 
+            \hline
+            0 & 1 & 1 \\
+            \hline
+            1 & 0 & 1 \\
+            \hline
+            1 & 1 & 0 \\ [1ex] 
+            \hline
+            \end{tabular}
+            \caption{Truth table of gate $ g_i $}
+            \label{Tab:XORgate}
+        \end{threeparttable}
+    \end{table}
+\end{center}
+
+The goal is to hide the values in the truth table by assigning keys $ \mathpzc{k} $ to represent each bit; we refer to these keys as labels. These labels are randomly chosen and only used once. The intuition is that someone who does not know the labeling cannot tell if a random value represents a zero or one. We present the truth table and its labeling in an ordered manner, but we shuffle the rows in practice. To garble the gates, we use an encryption scheme $ E $ to encrypt the output wire bit under the corresponding input wire labels. Remark that different labels representing the same output bit value are encrypted to different values as the keys used for encryption are not the same. This is important as if each garbled value did not look different an observer could infer which type of logic gate it is by looking at the ratio of similar values. For example, an AND gate would have three similar values and one different one, while an \acrshort{xor} gate would have two and two. This property is intrinsic to Yao's as it hides the computed underlying function. \cref{Tab:GarbledGate} shows the labeling of the gate where superscript denotes the bit value associated with the key, and subscript denotes the associated wire. 
+
+So far, we have explained one party's role in the process: the circuit garbler. Once it has garbled the circuit, it only sends the garbled values to the other party, named the circuit evaluator. It also creates labels for its input, which can be used with the circuit, and sends that as well.
+
+\begin{center}
+    \begin{table}
+        \centering
+        \begin{threeparttable}
+            \begin{tabular}{|c | c | c | c|} 
+            \hline
+            input $w_0$ & input $w_1$ & output $w_2$ & garbled value \\ [0.5ex] 
+            \hline\hline
+            $ \mathpzc{k}_0^0 $ & $ \mathpzc{k}_1^0 $ & $ \mathpzc{k}_2^0 $ & $ E_{\mathpzc{k}^0_0, \mathpzc{k}^0_1}(\mathpzc{k}_2^0) $ \\ 
+            \hline
+            $ \mathpzc{k}_0^0 $ & $ \mathpzc{k}_1^1 $ & $ \mathpzc{k}_2^1 $ & $ E_{\mathpzc{k}^0_0, \mathpzc{k}^1_1}(\mathpzc{k}_2^1) $ \\
+            \hline
+            $ \mathpzc{k}_0^1 $ & $ \mathpzc{k}_1^0 $ & $ \mathpzc{k}_2^1 $ & $ E_{\mathpzc{k}^1_0, \mathpzc{k}^0_1}(\mathpzc{k}_2^1) $ \\
+            \hline
+            $ \mathpzc{k}_0^1 $ & $ \mathpzc{k}_1^1 $ & $ \mathpzc{k}_2^0 $ & $ E_{\mathpzc{k}^1_0, \mathpzc{k}^1_1}(\mathpzc{k}_2^0) $ \\ [1ex] 
+            \hline
+            \end{tabular}
+            \caption{Garbling of gate $ g_i $}
+            \label{Tab:GarbledGate}
+        \end{threeparttable}
+    \end{table}
+\end{center}
+
+The circuit evaluator cannot use its raw input with the garbled circuit; therefore, we translate it into labels the garbler picks. We use 1-out-of-2 \acrshort{ot}, denoted $ \text{\acrshort{ot}}^2_1$,  to perform the translations as it allows the garbler to supply two labels and the evaluator to choose which one it learns without revealing it to the garbler. The evaluator then evaluates the circuit as it has both inputs. However, it can only decrypt the row where it knows both labels, thus guaranteeing that it can only decrypt one row per gate successfully. As described so far, the encryption scheme $ E $ would have to be an \acrfull{indcca} secure scheme such that the evaluator knows which decryption was successful, but using signal bits \cite{USENIX:MNPS04} we can make it so that $ E $ only has to be an \acrfull{indcpa} secure scheme.
+
+After the evaluator is done evaluating the circuit, depending on the choice of the garbler, it could be left with the output in plain binary or with a set of labels. These labels can only be translated by knowing the correct labeling, which allows the parties to decide who should learn the computation's output.
+
+We consider computing the \acrfull{aes} function to give an example of how this is useful. Let us say that the first party $ P_1 $ constructs \acrshort{aes} as a binary circuit $ \mathcal{C} $. $ P_1 $ proceeds to garble the circuit and ensure the output wires on the output gates spit out labels; we denote the garbled circuit with $ \mathcal{G} $. Before it sends the garbled circuit $ \mathcal{G} $, it keeps the labeling for each gate for itself and only sends the garbled values for each gate. With $ \mathcal{G} $, it sends a garbling of the plaintext it wants to be encrypted. $ P_2 $ receives $ \mathcal{G} $ and $ P_1 $'s input, and then picks an encryption key. $ P_1 $ and $ P_2 $ together perform several $\text{\acrshort{ot}}^2_1$ to translate the encryption key such that it can be used with the garbled circuit. $ P_2 $ proceeds to evaluate the circuit, effectively encrypting the plaintext with its key. After the evaluation, the output labels are sent back to $ P_1 $, where they can be translated to reveal the ciphertext. What $ P_1 $ and $ P_2 $ have done is to obliviously encrypt $ P_1 $'s plaintext under $ P_2 $'s key without $ P_1 $ learning the encryption key (following the properties of \acrshort{aes}) and $ P_2 $ not learning the plaintext or ciphertext. The following example describes an \acrshort{oprf} functionality that is achieved through the use of generic \acrshort{mpc}. Understanding this example is useful as it is one of the basic parts of the protocol presented in \cref{sec:keywordsearch}.
+
+Any function can be computed using binary circuits, but some drawbacks exist. Modern computers use \acrshort{cpu} instructions to perform computations; this allows a process to choose which operations to compute selectively. An example would be that if the function computed contains an if-else statement, then depending on the conditions, only one block of the if-else is computed, allowing the process to branch. On the other hand, circuit representations are static descriptions of the function, which means that both blocks of the if-else must be a part of the circuit description. That is not to say that in regular computing, we cannot only execute one block of it depending on the inputs, but in secure computations, the main idea is to hide the contents of the computation; thus, only computing one block would reveal information about the computation, which transitively reveals information about the inputs. The challenge then becomes how we can compute sublinear functions without the possibility of branching.
+
+Suppose that $ P_1 $ inputs a database as an array of values and $ P_2 $ a search query into a secure computation. The function we want to compute is a keyword search, and for simplicity, the search query is an index on the database. $ P_2 $ is the circuit garbler and $ P_1 $ is the circuit evaluator. In the secure computation, $ P_2 $ could not directly use the index, even if it does not learn it, to fetch the array item in constant time as $ P_2 $ could tell which item was accessed as it only performs operations on that cell. The problem arises as $ P_1 $ is the one who supplies the array and, therefore, knows its ordering. We could solve this problem by having $ P_2 $ shuffle the array without $ P_1 $ learning the order. This idea is the basis for \acrshort{oram}, which utilizes a model of computation different from circuits, namely the \acrshort{ram} model. We therefore infer that to find sublinear solutions, we have to explore subfields of \acrshort{mpc} that use the \acrshort{ram} model.
+
+\refstepcounter{subsection}\subsection*{\thesubsection\quad MP-SPDZ}\label{subsec:MPSPDZ}
+
+In \cref{chap:protocolFromMPC} and \cref{chap:SolutionPDS}, we implement our proposed solutions. Critical parts of those solutions rely on generic \acrshort{mpc}, therefore, we use MP-SPDZ \cite{CCS:Keller20} by Marcel Keller to implement them. This framework allows us to implement high-level code stored in .mpc files and compile them into low-level code that we execute as a secure computation. Integrated into MP-SPDZ are different variable types, like secret integers (sint), secret bit(s) (sbit(s)), and container types like arrays and tensors. One great feature is that it also supports Bristol Fashion format binary circuits \cite{bristol2020}, which allows us to directly describe a function as a binary circuit and use it for secure computation. The different parties involved are emulated in their process, and an SSH connection is established between them for communication, allowing parties to be run locally on the same computer or stand-alone on separate computers. This gives the unique ability to test in \acrshort{lan} and \acrfull{wlan} conditions. Overall, MP-SPDZ is a well-optimized platform for various experiments on secure computations, with loads of generic \acrshort{mpc} protocols, called programs, from which to choose.

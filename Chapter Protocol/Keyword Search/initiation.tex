@@ -1,0 +1,99 @@
+\refstepcounter{subsection}\subsection*{\thesubsection\quad Initiation}\label{subsec:KeywordSearchInitiation}
+
+The goal is for the server to derive some auxiliary information $ A $ about the database $ D $. An inverted index matrix is often used in database search as it is efficiently searched, as it structures all the values of the records in the left column and then puts the index of each record that contains said value in the right column. We think of this structure as each row being a tuple consisting of the value $ v_j $ and a set of indices $ I_j $, $ \left( v_j , I_{j} \right) $. To enforce the access control the server filters values depending on the client's identity $ \mathcal{U}$, when creating the inverted index matrix. This is done in $ \Filter $. Importantly, we pad every set of indices $ I_j $, as their length is useable as a direct identifier. The padding is performed by adding as many unique dummy indices as is required such that $ I_j $ is the length of $ \sigma $. We stress that these dummy indices have to be indices that are not valid indices on the database and that they are unique per set $ I_j $, \cref{algo:Filter}.
+
+\hfill
+
+\RestyleAlgo{ruled}
+\begin{algorithm}[H]
+    \LinesNumbered
+    \caption{Server - $ \Filter $}
+    \label{algo:Filter}
+    \KwIn{Client's Identity $ \mathcal{U} $}
+    \KwIn{Database $ D \gets \left[
+            R^{\mathrm{values}}_1, 
+            R^{\mathrm{values}}_2, 
+            ... , 
+            R^{\mathrm{values}}_m
+        \right]  $}
+    \KwOut{Auxiliary information $ A $}
+
+    \vspace*{0.48cm}
+
+    $ A \gets \left[ \phantom{=}\right] $
+
+    \For{$ R^{\mathrm{values}}_{\iota} \mathrm{\phantom{|} in \phantom{|}} D $}{
+
+        \For{$ v_j \mathrm{\phantom{|} in \phantom{|}} R^{\mathrm{values}}_{\iota} $}{
+
+            \If{ $ v_j \mathrm{\phantom{|} allowed \phantom{|} by \phantom{|}} \mathcal{U}$} {
+                \eIf{$  v_j \mathrm{\phantom{|} in \phantom{|}} A \mathrm{\phantom{|} and \phantom{|}} \iota \mathrm{\phantom{|} not \phantom{|}  in \phantom{|}} I_j $}{
+
+                $ I_j $.add$ \left( \iota \right)$ 
+
+            }{
+
+                $ I_j \gets \left[ \phantom{=}\right] $
+
+                $ I_j $.add$ \left( \iota \right)$  
+
+                $ A $.add$ \left( v_j, I_j \right) $
+
+            }
+            }
+
+        }
+
+    }
+
+    \vspace*{0.48cm}
+
+    \KwRet{$ A $}
+\end{algorithm}
+
+$ \Garble $ encrypts $ A $, with the two encryption keys, $ e_1 $ and $ e_2 $ picked by the server. We use $ e_1 $ to encrypt the hashes of the values and $ e_2 $ to derive a new ephemeral encryption key $ e_{2,j} $ that encrypts the set of indices $ I_j $. In the end, the order of the tuples in $ A' $ is randomly shuffled, \cref{algo:Garble}. The server then sends the encrypted auxiliary information $ A' $ to the client.
+
+\hfill
+
+\RestyleAlgo{ruled}
+\begin{algorithm}[H]
+    \LinesNumbered
+    \caption{Server - $ \Garble $}
+    \label{algo:Garble}
+    \KwIn{Auxiliary information $ A $}
+    \KwIn{Encryption keys $ e_1 $, $ e_2 $}
+    \KwOut{Encrypted auxiliary information $ A' $}
+
+    \hfill
+
+    \For{$ I_j \mathrm{\phantom{|} in \phantom{|}} A $}{
+
+        $ I_j $.padToLength$\left(\sigma\right) $
+
+    }
+
+    \For{$ \left( v_j, I_j \right) \mathrm{\phantom{|} in \phantom{|}} A $}{
+
+        $ I'_j \gets \left[ \phantom{=} \right] $
+
+        $ e_{2,j} \gets \Encrypt \left( \Hash \left( v_j\right), e_2 \right) $
+
+        \For{$ \iota \mathrm{\phantom{|} in \phantom{|}} I_j $}{
+
+            $ \iota' \gets \Encrypt \left( \iota, e_{2,j} \right) $
+
+            $ I'_j $.add$ \left( \iota' \right) $
+
+        }
+
+        $ v'_j \gets \Encrypt \left( \Hash \left( v_j\right), e_1 \right) $
+
+        $ A' $.add$ \left( v'_j, I'_j  \right) $
+    }
+
+    $ A' $.shuffle()
+
+    \vspace*{0.48cm}
+
+    \KwRet{$ A' $}
+\end{algorithm}

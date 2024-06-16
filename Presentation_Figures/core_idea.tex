@@ -1,0 +1,49 @@
+\noindent
+\begin{figure} [h]
+    \centering
+    \captionsetup{justification=centering,margin=1cm}
+    \begin{tikzpicture}[auto,>=Triangle,font=\sffamily]
+        \node (server) {};
+        \node[base left=8cm of server] (client) {};
+        \coordinate[below=14.79cm of server] (server_ground);
+        \coordinate[below=14.79cm of client] (client_ground);
+        
+        \begin{scope}[line width=3pt,shift={(client_ground)},
+            nodes={above}, draw=dark_gray, x={($(server_ground)-(client_ground)$)},y={($(client.south)-(client_ground)$)}]
+
+            \draw[] (0.05, 0.565) node (indices) {\LARGE{$ [ \phantom{R_1,} $}};
+            \draw[] (0.1, 0.565) node (indices) {\LARGE{$ 1 $}};
+            \draw[] (0.2, 0.565) node (indices) {\LARGE{$ , $}};
+            \draw[] (0.3, 0.565) node (indices) {\LARGE{$ 2 $}};
+            \draw[] (0.4, 0.565) node (indices) {\LARGE{$ , $}};
+            \draw[] (0.5, 0.565) node (indices) {\LARGE{$ 3 $}};
+            \draw[] (0.6, 0.565) node (indices) {\LARGE{$ , $}};
+            \draw[] (0.7, 0.565) node (indices) {\LARGE{$ \dots $}};
+            \draw[] (0.8, 0.565) node (indices) {\LARGE{$ , $}};
+            \draw[] (0.9, 0.565) node (indices) {\LARGE{$ n $}};
+            \draw[] (0.95, 0.565) node (indices) {\LARGE{$ \phantom{R_1,} ] $}};
+
+            \draw[] (-0.2, 0.51) node (title_retrieval2) {\large{\textit{PSI}}};
+            \draw[] (1.2, 0.51) node (title_retrieval2) {\large{\textit{Search}}};
+
+            \draw[densely dotted,line width=2pt, shorten <=2pt, dark_gray] (1.2, 0.5) -- (-0.2, 0.5);
+            
+            \draw[] (-0.2, 0.45) node (title_retrieval2) {\large{\textit{OT}}};
+            \draw[] (1.2, 0.45) node (title_retrieval2) {\large{\textit{Retrieval}}};
+
+            \draw[] (0.05, 0.38) node (indices) {\LARGE{$ [ \phantom{R_1,} $}};
+            \draw[] (0.1, 0.38) node (indices) {\LARGE{$ R_1 $}};
+            \draw[] (0.2, 0.38) node (indices) {\LARGE{$ , $}};
+            \draw[] (0.3, 0.38) node (indices) {\LARGE{$ R_2 $}};
+            \draw[] (0.4, 0.38) node (indices) {\LARGE{$ , $}};
+            \draw[] (0.5, 0.38) node (indices) {\LARGE{$ R_3 $}};
+            \draw[] (0.6, 0.38) node (indices) {\LARGE{$ , $}};
+            \draw[] (0.7, 0.38) node (indices) {\LARGE{$ \dots $}};
+            \draw[] (0.8, 0.38) node (indices) {\LARGE{$ , $}};
+            \draw[] (0.9, 0.38) node (indices) {\LARGE{$ R_n $}};
+            \draw[] (0.95, 0.38) node (indices) {\LARGE{$ \phantom{R_1,} ] $}};
+
+        \end{scope}
+    \end{tikzpicture}
+    \label{ill:CoreIdea}
+\end{figure}

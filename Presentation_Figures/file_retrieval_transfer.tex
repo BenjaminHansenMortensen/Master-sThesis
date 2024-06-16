@@ -1,0 +1,77 @@
+\noindent
+\begin{figure} [H]
+    \centering
+    \captionsetup{justification=centering,margin=1cm}
+    \caption*{\hspace*{1.4cm}\textbf{\LARGE{Communication Flow}}}
+    \begin{tikzpicture}[auto,>=Triangle,font=\sffamily]
+        \node (server) {\Large Server};
+        \node[base left=8cm of server] (client) {\Large Client $ \mathcal{U} $};
+        \coordinate[below=14.79cm of server] (server_ground);
+        \coordinate[below=14.79cm of client] (client_ground);
+        
+        \begin{scope}[line width=3pt,shift={(client_ground)},
+            nodes={above}, draw=dark_gray, x={($(server_ground)-(client_ground)$)},y={($(client.south)-(client_ground)$)}]
+            \draw[] (0, 0.9) node (encode) {$ I'_i \gets \Encode \left( I_i, \pi, \eta, \upsilon \right) $};
+            \draw[] (1, 0.9) node (encode_receive) {\phantom{$ \left( A \right) $}};
+            \draw[ultra thick, -{Stealth[scale=1]}] (encode) -- (encode_receive);
+
+            \draw[] (1, 0.825) node (garble) {$ F'_i \gets \Retrieve \left( D', I'_i \right) $};
+            \draw[] (0, 0.825) node (garble_receive) {\phantom{$ \left( A' \right) $}};
+            \draw[ultra thick, -{Stealth[scale=1]}] (garble) -- (garble_receive);
+
+            \draw[] (0, 0.75) node (decode) {$ F_i \gets \Decode \left( F'_i, K \right) $};
+            \draw[] (1, 0.75) node (decode_receive) {\phantom{$ \left( A' \right) $}};
+
+
+            \draw[line width=1pt, light_gray] (0.5, 1) -- (0.5, 0.75);
+
+            \draw[-, line width=2pt, shorten <=2pt, black] (1.2, 0.725) -- (-0.2, 0.725);
+
+            \draw[] (0.075, 0.565) node (indices) {\Large{$ [ \phantom{R_1,} $}};
+            \draw[] (0.1, 0.565) node (index_1) {\Large{$ 1 $}};
+            \draw[] (0.2, 0.565) node (index) {\Large{$ , $}};
+            \draw[] (0.3, 0.565) node (index_2) {\Large{$ 2 $}};
+            \draw[] (0.4, 0.565) node (index) {\Large{$ , $}};
+            \draw[] (0.5, 0.565) node (index_3) {\Large{$ 3 $}};
+            \draw[] (0.6, 0.565) node (index) {\Large{$ , $}};
+            \draw[] (0.7, 0.565) node (index) {\Large{$ \dots $}};
+            \draw[] (0.8, 0.565) node (index) {\Large{$ , $}};
+            \draw[] (0.9, 0.565) node (index_n) {\Large{$ n $}};
+            \draw[] (0.925, 0.565) node (indices) {\Large{$ \phantom{R_1,} ] $}};
+
+            \draw[] (0.075, 0.415) node (indices) {\Large{$ [ \phantom{R_1,} $}};
+            \draw[] (0.1, 0.415) node (perm_3) {\Large{$ \pi_3 $}};
+            \draw[] (0.2, 0.415) node (perm) {\Large{$ , $}};
+            \draw[] (0.3, 0.415) node (perm_n) {\Large{$ \pi_n $}};
+            \draw[] (0.4, 0.415) node (perm) {\Large{$ , $}};
+            \draw[] (0.5, 0.415) node (perm_1) {\Large{$ \pi_1 $}};
+            \draw[] (0.6, 0.415) node (perm) {\Large{$ , $}};
+            \draw[] (0.7, 0.415) node (perm) {\Large{$ \dots $}};
+            \draw[] (0.8, 0.415) node (perm) {\Large{$ , $}};
+            \draw[] (0.9, 0.415) node (perm_2) {\Large{$ \pi_2 $}};
+            \draw[] (0.925, 0.415) node (indices) {\Large{$ \phantom{R_1,} ] $}};
+            \draw[ultra thick, -{Stealth[scale=1]}] (index_1) -- (perm_1);
+            \draw[ultra thick, -{Stealth[scale=1]}] (index_2) -- (perm_2);
+            \draw[ultra thick, -{Stealth[scale=1]}] (index_3) -- (perm_3);
+            \draw[ultra thick, -{Stealth[scale=1]}] (index_n) -- (perm_n);
+
+            \draw[] (0.075, 0.265) node (indices) {\Large{$ [ \phantom{R_1,} $}};
+            \draw[] (0.1, 0.265) node (record_3) {\Large{$ D'_3 $}};
+            \draw[] (0.2, 0.265) node (record) {\Large{$ , $}};
+            \draw[] (0.3, 0.265) node (record_n) {\Large{$ D'_n $}};
+            \draw[] (0.4, 0.265) node (record) {\Large{$ , $}};
+            \draw[] (0.5, 0.265) node (record_1) {\Large{$ D'_1 $}};
+            \draw[] (0.6, 0.265) node (record) {\Large{$ , $}};
+            \draw[] (0.7, 0.265) node (record) {\Large{$ \dots $}};
+            \draw[] (0.8, 0.265) node (record) {\Large{$ , $}};
+            \draw[] (0.9, 0.265) node (record_2) {\Large{$ D'_2 $}};
+            \draw[] (0.925, 0.265) node (indices) {\Large{$ \phantom{R_1,} ] $}};
+            \draw[ultra thick, -{Stealth[scale=1]}] (perm_1) -- (record_1);
+            \draw[ultra thick, -{Stealth[scale=1]}] (perm_2) -- (record_2);
+            \draw[ultra thick, -{Stealth[scale=1]}] (perm_3) -- (record_3);
+            \draw[ultra thick, -{Stealth[scale=1]}] (perm_n) -- (record_n);
+
+        \end{scope}
+    \end{tikzpicture}
+    \label{ill:FileRetrievalTransfer}
+\end{figure}

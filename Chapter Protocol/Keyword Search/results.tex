@@ -1,0 +1,68 @@
+\refstepcounter{subsection}\subsection*{\thesubsection\quad Results}\label{subsec:KeywordSearchResults}
+
+
+The time complexity of $ \Filter $ depends on the number of records $ m $ and the some scalar of number of values in the record $ \mu $, thus its time complexity is $ \BigO \left( m \cdot \mu \right) $. The time complexity of $ \Garble $ is dependent on the padding length $ \sigma $, which we keep constant across executions, and the number of unique values from all the records $ \theta $; thus, its time complexity is $ \BigO \left( \sigma \cdot \theta \right) $. $ \Search $ has a constant number of encryptions with inputs of constant size $ \beta $, thereby making its time and communication complexity $ \BigO \left( 1 \right) $.
+
+We instantiate $ \Encrypt $ with \acrshort{aes} in \acrfull{ecb} mode, $ \Hash $ with \acrfull{shake}, and the block length $ \beta = 128 $ bits. $ A $ and $ A' $ are implemented as a hashmaps.
+
+\begin{figure}[H]
+    \caption{$ \Filter $ - Runtime}
+    \label{fig:FilterRuntime}
+    \centering
+    \begin{tikzpicture}
+        \begin{axis}[
+            xlabel={Database size (\si{\mega\byte})},
+            ylabel={seconds},
+            grid=major,
+            cycle list name=black white,
+        ]
+        
+
+        \addplot table {../Chapter Protocol/Keyword Search/Data/keywordfilter.txt};
+        \end{axis}
+    \end{tikzpicture}
+\end{figure}
+
+In the experiment, we kept $ n = m $. From the runtimes \cref{fig:FilterRuntime}, we find that $ \Filter $ exerts closer to a quadratic runtime because, on average, new records scale $ \mu $ by a constant factor, implying that it scales with $ m $.
+
+\begin{figure}[H]
+    \caption{$ \Garble $ - Runtime}
+    \label{fig:GarbleRuntime}
+    \centering
+    \begin{tikzpicture}
+        \begin{axis}[
+            xlabel={Database size (\si{\mega\byte})},
+            ylabel={seconds},
+            grid=major,
+            cycle list name=black white,
+        ]
+        
+
+        \addplot table {../Chapter Protocol/Keyword Search/Data/encryptA.txt};
+        \end{axis}
+    \end{tikzpicture}
+\end{figure}
+
+$ \Garble $ exerts a linear runtime, which makes sense as we kept the padding length $ \sigma $ constant, implying that $ \theta $ is scaled with $ n $. The magnitude of the two algorithms is in seconds, so they are feasible as is. However, it is important to highlight that these results do not represent industry-standard performance as the encryption is done in software, and the generation of the inverted index matrix is done rather simplistically. The linear time complexity in $ \Garble $ also backs up our assumption that new records, on average, introduce the same amount of new data.
+
+\begin{figure}[H]
+    \caption{$ \Search $ - Runtime}
+    \label{fig:SearchRuntime}
+    \centering
+    \begin{tikzpicture}
+        \begin{axis}[
+            xlabel={Database size (\si{\mega\byte})},
+            ylabel={seconds},
+            ymin={0},
+            ymax={1},
+            grid=major,
+            cycle list name=black white,
+        ]
+        
+
+        \addplot table {../Chapter Protocol/Keyword Search/Data/keywordsearch.txt};
+        \end{axis}
+    \end{tikzpicture}
+\end{figure}
+
+Lastly, we verify the constant time complexity of $ \Search $, with a runtime of around 0.15 seconds and communication cost of 0.31 megabytes sent by the client and 0.31 megabytes sent by the server.

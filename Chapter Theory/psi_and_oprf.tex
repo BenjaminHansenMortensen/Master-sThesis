@@ -1,0 +1,31 @@
+\section{Private Set Intersection}
+\label{sec:psi}
+%\addcontentsline{toc}{section}{Private Set Intersection}
+
+\acrshort{oprf} was defined in the works of Freedman et al. \cite{TCC:FIPR05}, and in the same paper, they proposed a protocol to access records on a database by keywords contained in the records. The paper considers a similar problem to ours, and from it, we take away the idea of using \acrshort{psi} to perform a keyword search. 
+
+\acrshort{psi} was introduced by Michael J. Freedman, Kobbi Nissim, and Benny Pinkas \cite{EC:FreNisPin04}. It allows parties to input their elements into the protocol and learn the intersecting elements between the sets. In addition, a function could be computed at the intersection before revealing the output, a valuable functionality. An example of the use of \acrshort{psi} is that it allows online databases of leaked passwords to be hosted where users can submit their password to check if it is in the database without the user revealing their password.
+
+\newcommand{\Hash}{\ensuremath{\mathsf{Hash}}}
+
+To ensure that we understand how it works, let us explore a well-known \acrshort{psi} protocol introduced in the works of Catherine A. Meadows \cite{Meadows86}. Let us consider the two-party semi-honest setting. $ P_1 $ is in possession of set $ X $ and $ P_2 $ is in the possession of set $ Y $. We compute the intersection function $ f(X, Y) = X \cap Y $, private keys $ e_1 $ and $ e_2 $ are elements in a group where the \acrfull{ddh} assumption holds, and $ \Hash(x) $ as a hash function, modeled as a random oracle. The protocol goes as follows:
+
+
+\begin{enumerate}
+    \item $ P_1 $ picks its private key $ e_1 $.
+    \item $ P_2 $ picks its private key $ e_2 $.
+    \item $ P_1 $ computes $ \lbrace \Hash(x)^{e_1} \vert x \in X \rbrace = X^{e_1} $.
+    \item $ P_2 $ computes $ \lbrace \Hash(y)^{e_2} \vert y \in Y \rbrace = Y^{e_2} $.
+    \item $ P_1 $ sends $ X^{e_1} $ to $ P_1 $.
+    \item $ P_2 $ computes $ \lbrace (x^{e_1})^{e_2} \vert x^{e_1} \in X^{e_1} \rbrace = \lbrace \Hash(x)^{e_1 \cdot e_2} \vert x \in X \rbrace = X^{e_1 \cdot e_2} $.
+    \item $ P_2 $ send $ X^{e_1 \cdot e_2} $ to $ P_1 $.
+    \item $ P_1 $ computes $ \lbrace (x^{e_1 \cdot e_2})^{\frac{1}{e_1}} \vert x^{e_1 \cdot e_2} \in X^{e_1 \cdot e_2} \rbrace = \lbrace \Hash(x)^{e_1 \cdot e_2 \cdot \frac{1}{e_1}} \vert x \in X \rbrace = \lbrace \Hash(x)^{e_2} \vert x \in X \rbrace = X^{e_2} $.
+    \item $ P_2 $ sends $ Y^{e_2} $ to $ P_1 $.
+    \item $ P_1 $ computes $ O = \lbrace x^{e_2} \in X^e_2 \vert x^{e_2} = y^{e_2}, y^{e_2} \in Y^{e_2} \rbrace = \lbrace \Hash(x)^{e_2} \in X^{e_2} \vert \Hash(x)^{e_2} = H(y)^{e_2} , \Hash(y)^{e_2} \in Y^{e_2} \rbrace $.
+\end{enumerate}
+
+The set $ O $ contains all the masked elements at the intersection. Thus, $ P_1 $ learns $ f(X,Y) = X \cap Y $, while $ P_2 $ learns nothing.
+
+In the protocol, we can envision that $ P_1 $ is a client in possession of a keyword $ x $ and that $ P_2 $ is a server with a database $ Y $. We construct $ Y $ such that all the keywords of the records $ y_i $ are paired with the index $ i $ of the record it originates from. We follow the same approach as the protocol above, the client $ P_1 $ would find the intersection of $ x $ and $ Y $, which enables it to learn the index of the record it is interested in. Thus, the client successfully performed a keyword search on the database without learning anything about the records other than whether or not its keyword existed, and the server learned nothing. This broad idea is the basis of the protocol presented in \cref{sec:keywordsearch}, just with a different \acrshort{psi} protocol.
+
+We have now determined that we can perform the search functionality with a \acrshort{psi} protocol. However, this only solves one part of the puzzle, as we still need to transfer the records from one party to the other oblivious. We, therefore, explore \acrshort{oram}, \acrshort{pir}, and \acrshort{ot} as potential candidate subfields to give us a solution. 

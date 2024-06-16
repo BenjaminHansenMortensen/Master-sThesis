@@ -1,0 +1,28 @@
+\refstepcounter{subsection}\subsection*{\thesubsection\quad Results}\label{subsec:RetrievalResults}
+
+The time complexity is dependent on the padding length $ \sigma $ of  $ I' $. We, therefore, fix $ \sigma = 5 $ so that it is constant for all executions; further, the number of legitimate records retrieved $ l $ determines computation time in $ \Encode $, and it determines how many times $ \Decode $ is executed, so we, therefore, fix $ I' $ so that it consists of one legitimate index and four dummy indices, doing so fixes the number of retrieved records $ l = 1 $. It is essential to realize that our protocol is a $ k \times l $-out-of-$ n $ \acrshort{ot}, meaning that if we do not fix $ l $ and $ \sigma $ across executions, it will vary depending on the contents of the records. Essentially, fixing them mitigates data bias across transfers from different databases. $ k $ represents the number of transfers, which we fix to $ k = 1 $, giving us a time and communication complexity of $ \BigO \left( 1 \right) $.
+
+For brevity, we combine all three algorithms into one program. $ I', \upsilon, \eta, $ and $ I $ are implemented as hashsets.
+
+\begin{figure}[H]
+    \caption{File Retrieval - Runtime}
+    \label{fig:fileRetrievalRuntime}
+    \centering
+    \begin{tikzpicture}
+        \begin{axis}[
+            xlabel={Database size (\si{\mega\byte})},
+            ylabel={seconds},
+            ymin={0},
+            ymax={1},
+            grid=major,
+            cycle list name=black white,
+        ]
+        
+
+        \addplot table {../Chapter Protocol/Retrieval/Data/transfer.txt};
+        \end{axis}
+    \end{tikzpicture}
+\end{figure}
+
+In the experiment, we find that each transfer takes about 0.32 seconds and is independent of the database size, thus verifying the constant time complexity. As we fixed $ \sigma $, the total communication $ 2\sigma + \omega \sigma $, counting each index in $ I' $ as two bytes, is 30.09 kilobytes for each transfer.
+

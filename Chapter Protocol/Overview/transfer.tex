@@ -1,0 +1,115 @@
+\refstepcounter{subsection}\subsection*{\thesubsection\quad Transfer}\label{subsec:OverviewTransfer}
+
+The transfer step can be executed $ k $ number of times. We call an execution a transfer, as the server obliviously transfers files to the client. A transfer has the client and server perform the $ \Encode $, $ \Retrieve $, and $ \Decode $ algorithms in both the keyword search and semantic search variants, with the implementation of $ \Search $ differing between the two.
+
+In the first type, keyword search, the client has the encrypted auxiliary information $ A' $ that we want it to compare with its search query $ q_i $. The way the client does this is by getting the hash $ q'_i $ of its search query, using the $ \Hash $ algorithm, encrypted with algorithm $ \Encrypt $ under the server's encryption keys $ e_1 $ and $ e_2 $ using generic \acrshort{mpc}. Once it has the two encrypted variants $ q_{i, e_1} $ and $ q_{i, e_2} $, it will use them with $ \Search $, which internally uses the $  \Decrypt$ algorithm, to derive a set of indices $ I_i $.
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[auto,>=Triangle,font=\sffamily]
+        \node (server) {\Large Server $ \phantom{\left( \mathcal{U} \right)} $ };
+        \node[base left=4cm  of server] (client) {\Large Client $ \left( \mathcal{U} \right) $};
+        \coordinate[below=8cm of server] (server_ground);
+        \coordinate[below=8cm of client] (client_ground);
+        
+        \begin{scope}[line width=3pt,shift={(client_ground)},
+            nodes={above}, draw=dark_gray, x={($(server_ground)-(client_ground)$)},y={($(client.south)-(client_ground)$)}]
+
+            \draw[] (1, 0.9) node (filter) {$ e_1 $};
+            \draw[ultra thick, -{Stealth[scale=1]}] (filter) -- (0.7, 0.8);
+            \draw[] (1, 0.825) node (filter) {$ e_2 $};
+            \draw[ultra thick, -{Stealth[scale=1]}] (filter) -- (0.8, 0.8);
+            \draw[] (0, 0.9) node (q) { $ q'_i \gets \Hash \left( q_i \right) $};
+            \draw[ultra thick, -{Stealth[scale=1]}] (q) -- (0.3, 0.8);
+
+            \draw[ultra thick, -] (0.1, 0.775) -- (0.9, 0.775);
+            \draw[ultra thick, -] (0.1, 0.775) -- (0.1, 0.475);
+            \draw[ultra thick, -] (0.9, 0.775) -- (0.9, 0.475);
+            \draw[ultra thick, -] (0.1, 0.475) -- (0.9, 0.475);
+
+            \draw[] (0.5, 0.675) node {\large \underline{MPC:}};
+
+            \draw[] (0.5, 0.575) node (encrypt1) {$ q_{i, e_1} \gets \Encrypt \left( q'_i, e_1 \right) $};
+            \draw[] (0.5, 0.5) node (encrypt2) {$ q_{i, e_2} \gets \Encrypt \left( q'_i, e_2 \right) $};
+
+            \draw[] (0, 0.3) node (q) {$ \left( q_{i, e_1}, q_{i, e_2} \right) $};
+            \draw[ultra thick, -{Stealth[scale=1]}] (0.3, 0.45) -- (q);
+
+            \draw[] (0, 0.225) node (search) {$ I_i \gets \Search \left( A', q_{i, e_1}, q_{i, e_2} \right) $};
+
+
+            \draw[line width=1pt, light_gray] (0.5, 1) -- (0.5, 0.775);
+            \draw[line width=1pt, light_gray] (0.5, 0.475) -- (0.5, 0.225);
+        \end{scope}
+    \end{tikzpicture}
+    \captionsetup{justification=centering,margin=1cm}
+    \caption{The communication flow between the client and the server in the keyword search transfer.}
+    \label{fig:OverviewTransferKeywordSearch}
+\end{figure}
+
+In the second type, semantic search, the client will use $ \Gamma $ to construct a vector embedding $ q_i' $ of its search query $ q_i $. $ \Search $ will be performed with the client inputting $ q_i' $ and the server inputting $ A $ to a generic \acrshort{mpc} protocol that compares $ q'_i $ and $ A $ using $ \Distance $. The output of $ \Search $ is a set of indices $ I_i $. 
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[auto,>=Triangle,font=\sffamily]
+        \node (server) {\Large Server $ \phantom{\left( \mathcal{U} \right)} $ };
+        \node[base left=4cm  of server] (client) {\Large Client $ \left( \mathcal{U} \right) $};
+        \coordinate[below=8cm of server] (server_ground);
+        \coordinate[below=8cm of client] (client_ground);
+        
+        \begin{scope}[line width=3pt,shift={(client_ground)},
+            nodes={above}, draw=dark_gray, x={($(server_ground)-(client_ground)$)},y={($(client.south)-(client_ground)$)}]
+
+            \draw[] (1, 0.9) node (filter) {$ A $};
+            \draw[ultra thick, -{Stealth[scale=1]}] (filter) -- (0.7, 0.8);
+            \draw[] (0, 0.9) node (q) { $ q'_i \gets \Gamma \left( q_i \right) $};
+            \draw[ultra thick, -{Stealth[scale=1]}] (q) -- (0.3, 0.8);
+
+            \draw[ultra thick, -] (0.1, 0.775) -- (0.9, 0.775);
+            \draw[ultra thick, -] (0.1, 0.775) -- (0.1, 0.55);
+            \draw[ultra thick, -] (0.9, 0.775) -- (0.9, 0.55);
+            \draw[ultra thick, -] (0.1, 0.55) -- (0.9, 0.55);
+
+            \draw[] (0.5, 0.675) node {\large \underline{MPC:}};
+
+            \draw[] (0.5, 0.575) node (encrypt1) {$ I_i \gets \Search \left( A, q'_i \right) $};
+
+            \draw[] (0, 0.375) node (q) {$ I_i $};
+            \draw[ultra thick, -{Stealth[scale=1]}] (0.3, 0.525) -- (q);
+
+            \draw[line width=1pt, light_gray] (0.5, 1) -- (0.5, 0.775);
+            \draw[line width=1pt, light_gray] (0.5, 0.55) -- (0.5, 0.375);
+        \end{scope}
+    \end{tikzpicture}
+    \captionsetup{justification=centering,margin=1cm}
+    \caption{The communication flow between the client and the server in the semantic search transfer.}
+    \label{fig:OverviewTransferSemanticSearch}
+\end{figure}
+
+Recall that we created the encoded database $ D' $ by sorting  datbase according to the random permutation $ \pi $. To retrieve the records, the client uses $ \pi $ to encode the indices $ I'_i $ and then sends them to the server. The server, in possession of $ D' $, responds with the encrypted records $ F'_i $, which the client decrypts with the keys $ K $ to derive the set of records $ F_i $ for that transfer.
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[auto,>=Triangle,font=\sffamily]
+        \node (server) {\Large Server $ \phantom{\left( \mathcal{U} \right)} $ };
+        \node[base left=4cm  of server] (client) {\Large Client $ \left( \mathcal{U} \right) $};
+        \coordinate[below=10cm of server] (server_ground);
+        \coordinate[below=10cm of client] (client_ground);
+        
+        \begin{scope}[line width=3pt,shift={(client_ground)},
+            nodes={above}, draw=dark_gray, x={($(server_ground)-(client_ground)$)},y={($(client.south)-(client_ground)$)}]
+            \draw[] (0, 0.9) node (setup) {$ I'_i \gets \Encode \left( I_i, \pi, \eta, \upsilon \right) $};
+            \draw[] (1, 0.9) node (setup_receive) {\phantom{$ \left( A \right) $}};
+            \draw[ultra thick, -{Stealth[scale=1]}] (setup) -- (setup_receive);
+            \draw[] (1, 0.825) node (filter) {$ F'_i \gets \Retrieve \left( D', I'_i\right) $};
+            \draw[] (0, 0.825) node (filter_receive) {\phantom{$ \left( A \right) $}};
+            \draw[ultra thick, -{Stealth[scale=1]}] (filter) -- (filter_receive);
+            \draw[] (0, 0.75) node (filter) {$ F_i \gets \Decode \left( F'_i, K \right) $};
+
+            \draw[line width=1pt, light_gray] (0.5, 1) -- (0.5, 0.75);
+        \end{scope}
+    \end{tikzpicture}
+    \captionsetup{justification=centering,margin=1cm}
+    \caption{The communication flow between the client and the server in the file retrieval.}
+    \label{fig:OverviewRetrieve}
+\end{figure}

@@ -1,0 +1,123 @@
+\refstepcounter{subsection}\subsection*{\thesubsection\quad OT-based Private Swap protocol}\label{subsec:OTbasedPSprotocol}
+
+In addition to the generic \acrshort{mpc}-based \acrshort{ps} protocol, we present a \acrshort{ps} protocol built from $\text{\acrshort{ot}}^2_1$, \cref{algo:ClientOTPS} and \cref{algo:ServerOTPS}. In it, the server applies key streams $ s'_i $ and $ s'_j $ to its two records $ D'_i $ and $ D'_j $ such that it has two pairs of encrypted records. The first pair, denoted $ M_0 $ and $ M_1 $, is the two records masked with $ s'_i $. The second pair, denoted $ N_0 $ and $ N_1 $, is masked with $ s'_j $. From these four masked records, it will perform two $\text{\acrshort{ot}}^2_1$ where the client, using the swap signal bit $ b $, requests $ b $ in the first \acrshort{ot} and $ \NOT \left( b \right) $ in the second. The client then applies its key streams $ s_i $ and $ s_j $ to the two records, giving $ C'_i $ and $ C'_j$, and sends them back to the server so that it receives $ C'_i $ first and then $ C'_j $ second. To finish the protocol, the server removes its key streams from the records by applying $ s'_i $ to the first it receives and $ s'_j $ to the second. Leaving it with $ C_j $ and $ C_j $, which are the two records encrypted and potentially swapped by the client.
+
+To assess the \acrshort{ot}-based \acrshort{ps} protocol with post-quantum security we assume, based on the works of \cite{CCS:BCGIKRS19}, that we can perform $ 2^{20} $ number of 128-bit \acrshort{ot}s in 0.5 seconds, which we simplify to $ 2^{20} $ per second as the protocol requires two \acrshort{ot}s per execution. We combine this assumption with the sequences $ a(n) $ and $ b(n) $ to approximate the protocol's efficiency. When  $ n = 2^{20} $, we multiply with the number of blocks per record $ \frac{\omega}{\beta} = 376 $ by $ a(n) $, and find that $ \PreProcess $ requires 41 397 780 480 total number of \acrshort{ot}s. We divide this by the efficiency assumption $ 2^{20} $, to approximate that the runtime is about 11 hours for a database size of 15 gigabytes. With perfect parallelization, we perform the same calculation but swap $ a(n) $ for $ b(n) $ and find that it takes 0.0753 seconds for a database size of 15 gigabytes, assuming that the \acrshort{ot}-extension protocol does not hinder to the parallelization of bitonic sort. Note that the approximations only include the \acrshort{ot} parts of the protocol.
+
+\noindent
+\begin{figure} [H]
+    \begin{minipage}{0.5\textwidth}
+        \RestyleAlgo{ruled}
+        \begin{algorithm}[H]
+            \LinesNumbered
+            \caption{Client $ \mathcal{U} $ - \newline OT-based Private Swap}
+            \label{algo:ClientOTPS}
+            \KwIn{$ b, s_i, s_j $}
+    
+            \KwOut{\phantom{$ C_i, C_j $}}
+    
+            \vspace*{0.48cm}
+    
+            \phantom{$ M_0 \gets \XOR \left( D'_i, s'_i \right) $}
+    
+            \phantom{$ M_0 \gets \XOR \left( D'_j, s'_i \right) $}
+    
+            \SetKwProg{OT}{oblivious transfer:}{}{end}
+            \OT{}{
+    
+                \KwIn{$ b $}
+    
+                \KwOut{$ M_b $}
+    
+            }
+    
+            \phantom{$ N_0 \gets \XOR \left( D'_i, s'_j \right) $}
+    
+            \phantom{$ N_1 \gets \XOR \left( D'_j, s'_j \right) $}
+    
+            $ b' \gets \NOT \left( b \right) $
+    
+            \OT{}{
+    
+                \KwIn{$ b' $}
+    
+                \KwOut{$ N_{b'} $}
+    
+            }
+    
+            $ C'_i \gets \XOR \left( M_b, s_i \right) $
+    
+            $ C'_j \gets \XOR \left( N_{b'}, s_j \right) $
+    
+            send $ C'_i $
+    
+            send $ C'_j $
+    
+            \phantom{$ C_i \gets \XOR \left( C'_i, s'_i \right) $}
+    
+            \phantom{$ C_j \gets \XOR \left( C'_j, s'_j \right) $}
+    
+            \vspace*{0.48cm}
+    
+            \KwRet{}
+    
+        \end{algorithm}
+    \end{minipage}
+    \begin{minipage}{0.49\textwidth}
+        \RestyleAlgo{ruled}
+        \begin{algorithm}[H]
+            \LinesNumbered
+            \caption{Server - \newline OT-based Private Swap}
+            \label{algo:ServerOTPS}
+            \KwIn{$ D'_i, D'_j, s'_i, s'_j $}
+        
+            \KwOut{$ C_i, C_j $}
+    
+            \vspace*{0.48cm}
+    
+            $ M_0 \gets \XOR \left( D'_i, s'_i \right) $
+    
+            $ M_1 \gets \XOR \left( D'_j, s'_i \right) $
+    
+            \SetKwProg{OT}{oblivious transfer:}{}{end}
+            \OT{}{
+    
+                \KwIn{$ M_0, M_1 $}
+    
+                \KwOut{$ $}
+    
+            }
+    
+            $ N_0 \gets \XOR \left( D'_i, s'_j \right) $
+    
+            $ N_1 \gets \XOR \left( D'_j, s'_j \right) $
+    
+            \phantom{$ b' \gets \NOT \left( b \right) $}
+    
+            \OT{}{
+    
+                \KwIn{$ N_0, N_1 $}
+    
+                \KwOut{\phantom{$ N_{b'} $}}
+    
+            }
+    
+            \phantom{$ C'_i \gets \XOR \left( M_b, s_i \right) $}
+    
+            \phantom{$ C'_j \gets \XOR \left( N_{b'}, s_j \right) $}
+    
+            receive $ C'_i $
+    
+            receive $ C'_j $
+    
+            $ C_i \gets \XOR \left( C'_i, s'_i \right) $
+    
+            $ C_j \gets \XOR \left( C'_j, s'_j \right) $
+    
+            \vspace*{0.48cm}
+    
+            \KwRet{$ C_i, C_j $}
+    
+        \end{algorithm}
+    \end{minipage}
+\end{figure}

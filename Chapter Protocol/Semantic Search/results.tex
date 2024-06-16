@@ -1,0 +1,25 @@
+\refstepcounter{subsection}\subsection*{\thesubsection\quad Results}\label{subsec:SemanticSearchResults}
+
+The time complexity of $ \Search $ is $ \BigO \left( m \right) $ as the search embedding $ q' $ is compared to every record embedding $ \gamma_i $. Further, we notice that this time complexity is for computations done in \acrshort{mpc}, which is especially costly.
+
+We choose a \acrshort{llm} $ \Gamma $ with an embedding dimension of 768, meaning that our embedding vectors $ \gamma_i $ are of length 768, and we instantiate $ \Distance $ with Euclidean distance.
+
+\begin{figure}[H]
+    \caption{$ \Search $ - Runtime}
+    \label{fig:SemanticSearchRuntime}
+    \centering
+    \begin{tikzpicture}
+        \begin{axis}[
+            xlabel={Database size (\si{\mega\byte})},
+            ylabel={seconds},
+            grid=major,
+            cycle list name=black white,
+        ]
+        
+
+        \addplot table {../Chapter Protocol/Semantic Search/Data/semanticsearch.txt};
+        \end{axis}
+    \end{tikzpicture}
+\end{figure}
+
+In the experiment, we find that the runtime of $ \Search $ indeed follows a linear time complexity. It shows feasibility for smaller-sized databases, but it quickly becomes infeasible as a doubling in size leads to a doubling in the runtime.

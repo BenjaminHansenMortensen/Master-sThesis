@@ -1,0 +1,74 @@
+\noindent
+\begin{figure} [H]
+    \centering
+    \captionsetup{justification=centering,margin=1cm}
+    \caption*{\hspace*{3.3cm}\textbf{\LARGE{Communication Flow}}}
+    \begin{tikzpicture}[auto,>=Triangle,font=\sffamily]
+        \node (server) {\Large Server};
+        \node[base left=8cm of server] (client) {\Large Client $ \mathcal{U} $};
+        \coordinate[below=14.79cm of server] (server_ground);
+        \coordinate[below=14.79cm of client] (client_ground);
+        
+        \begin{scope}[line width=3pt,shift={(client_ground)},
+            nodes={above}, draw=dark_gray, x={($(server_ground)-(client_ground)$)},y={($(client.south)-(client_ground)$)}]
+            
+            \draw[] (1, 0.9) node (filter) {$ A \gets \Filter \left( \mathcal{U}, D, \Gamma \right) $};
+            \draw[] (0, 0.9) node (filter_receive) {\phantom{$ \left( A \right) $}};
+
+            \draw[] (-0.2, 0.85) node (title_initiation) {\large{ $ \uparrow $ \textit{Initiation}}};
+
+            \draw[densely dotted,line width=1.5pt, shorten <=2pt, light_gray] (1.2, 0.837) -- (-0.2, 0.837);
+
+            \draw[] (-0.2, 0.787) node (title_transfers) {\large{$ \downarrow $\textit{Transfers}}};
+
+            \draw[] (1, 0.725) node (a) {$ A $};
+            \draw[ultra thick, -{Stealth[scale=1]}] (a) -- (0.7, 0.7);
+            \draw[] (0, 0.725) node (q) { $ q'_i \gets \Gamma \left( q_i \right) $};
+            \draw[ultra thick, -{Stealth[scale=1]}] (q) -- (0.3, 0.7);
+
+            \draw[ultra thick, -] (0.1, 0.675) -- (0.9, 0.675);
+            \draw[ultra thick, -] (0.1, 0.675) -- (0.1, 0.54);
+            \draw[ultra thick, -] (0.9, 0.675) -- (0.9, 0.54);
+            \draw[ultra thick, -] (0.1, 0.54) -- (0.9, 0.54);
+
+            \draw[] (0.5, 0.6) node {\large \underline{MPC:}};
+
+            \draw[] (0.5, 0.55) node (encrypt1) {$ I_i \gets \Search \left( A, q'_i \right) $};
+
+            \draw[] (0, 0.44) node (I) {$ I_i $};
+            \draw[ultra thick, -{Stealth[scale=1]}] (0.3, 0.515) -- (I);
+
+            \draw[line width=1pt, light_gray] (0.5, 1) -- (0.5, 0.675);
+            \draw[line width=1pt, light_gray] (0.5, 0.54) -- (0.5, 0.44);
+
+            \draw[-, line width=2pt, shorten <=2pt, black] (1.2, 0.415) -- (-0.2, 0.415);
+
+            \draw[] (0.5, 0.35) node (title_garble) {\Large{$ \Search $:}};
+
+            \node [shape=rectangle, align=center](table1) at (0.5, 0.07) {
+                \begin{tabular}{|c | c|}
+                    
+                    \hline \rule{0pt}{1.2\normalbaselineskip}
+                    $ \gamma_1 $ & $ \iota_1 $ \\ [1ex]
+                    \hline \rule{0pt}{1.2\normalbaselineskip}
+                    $ \gamma_2 $ & $ \iota_2 $ \\ [1ex]
+                    \hline \rule{0pt}{1.2\normalbaselineskip}
+                    $ \dots $ & $ \dots $ \\ [1ex]
+                    \hline \rule{0pt}{1.2\normalbaselineskip}
+                    $ \gamma_n $ & $ \iota_n $ \\ [1ex] 
+                    \hline
+                \end{tabular}
+            };
+
+            \draw[] (0.3, 0.275) node (find_q) {$ q'_i \overset{{\scriptscriptstyle?}}{\rightarrow} $};
+
+            \draw[] (0.3, 0.211) node (find_q) {$ q'_i \overset{{\scriptscriptstyle?}}{\rightarrow} $};
+
+            \draw[] (0.3, 0.155) node (find_q) {$ \dots $};
+
+            \draw[] (0.3, 0.09) node (find_q) {$ q'_i \overset{{\scriptscriptstyle?}}{\rightarrow} $};
+
+        \end{scope}
+    \end{tikzpicture}
+    \label{ill:SemanticSearchInitiation}
+\end{figure}

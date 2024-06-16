@@ -1,0 +1,514 @@
+\documentclass[a4paper, UKenglish, 11pt, twoside]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{babel}
+\usepackage[UKenglish]{uiomasterfp/uiomasterfp}
+
+%Citation Packages
+\usepackage{csquotes}
+\usepackage[backend=bibtex]{biblatex}
+\usepackage{silence}
+\WarningFilter{biblatex}{File 'UKenglish-plain.lbx'}
+\bibliography{../References/abbrev0.bib, ../References/crypto.bib, ../References/ref.bib}
+
+
+\usepackage{float}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{chngcntr}
+\counterwithout{equation}{chapter}
+\usepackage[flushleft]{threeparttable}
+\usepackage{tabularx}
+\usepackage[hidelinks]{hyperref}
+\usepackage{enumitem}
+\usepackage{algorithm2e}
+\usepackage{siunitx}
+\usepackage{breqn}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage{multirow}
+\usepackage{caption}
+\usepackage{listings}
+\usepackage{etoolbox}
+\usepackage{nameref}
+\usepackage[capitalise, noabbrev]{cleveref}
+\usepackage[justification=centering]{caption}
+\usepackage{xurl}
+\DeclareMathAlphabet{\mathpzc}{OT1}{pzc}{m}{it}
+\usepackage[acronym,nonumberlist]{glossaries}
+\makenoidxglossaries
+\usepackage{bm}
+
+\newcommand\Tstrut{\rule{0pt}{0.5ex}}
+\newcommand\Bstrut{\rule[2ex]{0pt}{0pt}}
+
+\newacronym{aes}{AES}{Advanced Encryption Standard}
+\newacronym{ca}{CA}{Certificate Authority}
+\newacronym{cpu}{CPU}{Central Processing Unit}
+\newacronym{ctr}{CTR}{Counter}
+\newacronym{ddh}{DDH}{Decisional Diffie-Hellman}
+\newacronym{ecb}{ECB}{Electronic Code Book}
+\newacronym{xor}{XOR}{Exclusive OR}
+\newacronym{ifi}{IFI}{Department of Informatics}
+\newacronym{ffi}{FFI}{Norwegian Defence Research Establishment}
+\newacronym{cpds}{cPDS}{computational Private Database Search}
+\newacronym{indcca}{IND-CCA}{Indistinguishable under Chosen Ciphertext Attack}
+\newacronym{indcpa}{IND-CPA}{Indistinguishable under Chosen Plaintext Attack}
+\newacronym{ip}{IP}{Internet Protocol}
+\newacronym{lan}{LAN}{Local Area Network}
+\newacronym{llm}{LLM}{Large Language Model}
+\newacronym{mpc}{MPC}{(Secure) Multi-Party Computation}
+\newacronym{oeis}{OEIS}{The On-line Encyclopedia of Integer Sequences}
+\newacronym{oprf}{OPRF}{Oblivious Pseudorandom Function}
+\newacronym{oram}{ORAM}{Oblivious Random Access Machine}
+\newacronym{ot}{OT}{Oblivious Transfer}
+\newacronym{uio}{UiO}{University of Oslo}
+\newacronym{pdq}{PDQ}{Private Database Query}
+\newacronym{pds}{PDS}{Private Database Search}
+\newacronym{pir}{PIR}{Private Information Retrieval}
+\newacronym{pnr}{PNR}{Passenger Name Record}
+\newacronym{ppt}{PPT}{Probabilistic Polynomial-Time}
+\newacronym{psi}{PSI}{Private Set Intersection}
+\newacronym{ps}{PS}{Private Swap}
+\newacronym{ram}{RAM}{Random Access Memory}
+\newacronym{sbert}{SBERT}{Sentence-BERT}
+\newacronym{shake}{SHAKE}{Secure Hash Algorithm and KECCAK}
+\newacronym{she}{SHE}{Somewhat Homomorphic Encryption}
+\newacronym{spir}{SPIR}{Symmetric Private Information Retrieval}
+\newacronym{tls}{TLS}{Transport Layer Security}
+\newacronym{wlan}{WLAN}{Wireless Local Area Network}
+
+\newglossaryentry{a}
+{
+    name={$ A $},
+    description={Auxiliary information about the database, $ A \in {\lbrace 0, 1 \rbrace}^\rho $}
+}
+\newglossaryentry{aa}
+{
+    name={$ A' $},
+    description={The encoded auxiliary information $ A $}
+}
+\newglossaryentry{aaa}
+{
+    name={$ \mathcal{A} $},
+    description={A probabilistic polynomial-time algorithm used to denote an adversary},
+    sort=A
+}
+\newglossaryentry{aaaa}
+{
+    name={$ \alpha $},
+    description={Additional time spent on landing and take-off when flying between two airports}
+}
+\newglossaryentry{b}
+{
+    name={$ b $},
+    description={A single bit, 0 or 1}
+}
+\newglossaryentry{bb}
+{
+    name={$ b' $},
+    description={The adversary's prediction bit, 0 or 1}
+}
+\newglossaryentry{bbb}
+{
+    name={$ \beta $},
+    description={The block size}
+}
+\newglossaryentry{c}
+{
+    name={$ C_i / C_j $},
+    description={A ciphertext}
+}
+\newglossaryentry{cc}
+{
+    name={$ C'_i / C'_j $},
+    description={A masked ciphertext}
+}
+\newglossaryentry{ccc}
+{
+    name={$ \mathcal{C} $},
+    description={A circuit description of a function},
+    sort=C
+}
+\newglossaryentry{cccc}
+{
+    name={$ c_i / c_j $},
+    description={A counter}
+}
+\newglossaryentry{ccccc}
+{
+    name={$ \chi $},
+    description={The length of the search query $ q $. $ \chi \in \mathbb{Z}^+ $}
+}
+\newglossaryentry{d}
+{
+    name={$ D $},
+    description={The database}
+}
+\newglossaryentry{dd}
+{
+    name={$ D' $},
+    description={The encoded database}
+}
+\newglossaryentry{ddd}
+{
+    name={$ d_i $},
+    description={A dummy record}
+}
+\newglossaryentry{dddd}
+{
+    name={$ \delta $},
+    description={Distance between two vectors}
+}
+\newglossaryentry{e}
+{
+    name={$ E $},
+    description={An encryption scheme}
+}
+\newglossaryentry{ee}
+{
+    name={$ \mathcal{E} \left( \lambda \right) $},
+    description={A negligible function $ \mathcal{E}: \mathbb{N} \mapsto \mathbb{R}^+ $ that takes the security parameter $ \lambda $},
+    sort=E
+}
+\newglossaryentry{eee}
+{
+    name={$ e_i / e_{i,j} $},
+    description={An encryption encryption key}
+}
+\newglossaryentry{eeee}
+{
+    name={$ \eta $},
+    description={The set of dummy record indices}
+}
+\newglossaryentry{f}
+{
+    name={$ F $},
+    description={The retrieved records, $ F \subset D $}
+}
+\newglossaryentry{ff}
+{
+    name={$ F' $},
+    description={The retrieved encrypted records}
+}
+\newglossaryentry{g}
+{
+    name={$ \mathcal{G} $},
+    description={A garbled circuit},
+    sort=g
+}
+\newglossaryentry{gg}
+{
+    name={$ \Gamma $},
+    description={A large language model that outputs vector embeddings}
+}
+\newglossaryentry{ggg}
+{
+    name={$ \gamma_i $},
+    description={A vector embedding produce with $ \Gamma $}
+}
+\newglossaryentry{h}
+{
+    name={$ H $},
+    description={A history of responses}
+}
+\newglossaryentry{i}
+{
+    name={$ I / I_i / I_j $},
+    description={A set of indices, $ I \in {\lbrace 1, 2, ... , n \rbrace}^\nu $}
+}
+\newglossaryentry{ii}
+{
+    name={$ I' / I'_i / I'_j $},
+    description={A set of encoded indices, $ I' \in {\lbrace 1, 2, ... , n \rbrace}^\sigma $}
+}
+\newglossaryentry{iii}
+{
+    name={$ i $},
+    description={An index or iteration, $ i \in {\lbrace 1, 2, ... , n \rbrace} $}
+}
+\newglossaryentry{iiii}
+{
+    name={$ i' $},
+    description={An encoded index, $ i' \in {\lbrace 1, 2, ... , n \rbrace} $}
+}
+\newglossaryentry{iiiii}
+{
+    name={$ \iota $},
+    description={An index, $ i \in {\lbrace 1, 2, ... , n \rbrace} $}
+}
+\newglossaryentry{k}
+{
+    name={$ K $},
+    description={The client's encryption keys and other encryption varliables}
+}
+\newglossaryentry{kk}
+{
+    name={$ k $},
+    description={The number of rounds of transfers, $ k \in {\lbrace 1, 2, ... , n \rbrace} $}
+}
+\newglossaryentry{kkk}
+{
+    name={$ \mathpzc{k} $},
+    description={A key or label for a bit in a garbled gate},
+    sort=k
+}
+\newglossaryentry{l}
+{
+    name={$ \lambda $},
+    description={The security parameter}
+}
+\newglossaryentry{m}
+{
+    name={$ M_0 / M_1 $},
+    description={ A masked record, $ M_0, M_1 \in {\left( 0, 1 \right)}^\omega $}
+}
+\newglossaryentry{mm}
+{
+    name={$ m $},
+    description={The number of records in the database, $ m \in \mathbb{Z}^+ $}
+}
+\newglossaryentry{mmm}
+{
+    name={$ \mu $},
+    description={The combined number of values in all the records $ R^{\mathrm{values}}_{\iota} $},
+    sort=m
+}
+\newglossaryentry{n}
+{
+    name={$ N_0 / N_1 $},
+    description={A masked record, $ N_0, N_1 \in {\left( 0, 1 \right)}^\omega $}
+}
+\newglossaryentry{nn}
+{
+    name={$ n $},
+    description={The length of the database. $ n \in \mathbb{Z}^+ $}
+}
+\newglossaryentry{nnn}
+{
+    name={$ \nu $},
+    description={The length of the indices $ I $, $ \nu \in \mathbb{Z}^+ $}
+}
+\newglossaryentry{o}
+{
+    name={$ O $},
+    description={An intersection between two sets}
+}
+\newglossaryentry{oo}
+{
+    name={$ \omega $},
+    description={The upper bound number of characters of any possible record}
+}
+
+\newglossaryentry{p}
+{
+    name={$ P_i $},
+    description={A party}
+}
+\newglossaryentry{pp}
+{
+    name={$ p $},
+    description={A probability, $ p \in \left(0, 1\right) $}
+}
+\newglossaryentry{ppp}
+{
+    name={$ \pi $},
+    description={A random permutation}
+}
+\newglossaryentry{q}
+{
+    name={$ q $},
+    description={The client's search query, $ q \in {\lbrace 0, 1 \rbrace}^\chi $}
+}
+\newglossaryentry{qq}
+{
+    name={$ q_{e_i} $},
+    description={The client's search query encrypted with some ephemeral key $ e_i $}
+}
+\newglossaryentry{qqq}
+{
+    name={$ q' $},
+    description={The client's encoded search query}
+}
+\newglossaryentry{r}
+{
+    name={$ R_i / R_j $},
+    description={A records that can take the form of $ R^{\mathrm{chars}}_{\iota} $ and $ R^{\mathrm{values}}_{\iota} $},
+    sort=R
+}
+\newglossaryentry{rr}
+{
+    name={$ R^{\mathrm{chars}}_{\iota} $},
+    description={An array of the character that makes up a record, each may be of different length denoted $ \vert R^{\mathrm{chars}}_{\iota} \vert $},
+    sort=R
+}
+\newglossaryentry{rrr}
+{
+    name={$ R^{\mathrm{values}}_{\iota} $},
+    description={An array of the values in a record, each may be of different length denoted $ \vert R^{\mathrm{values}}_{\iota} \vert $},
+    sort=R
+}
+\newglossaryentry{rrrr}
+{
+    name={$ \rho $},
+    description={The length of the auxiliary information $ A $. $ \rho \in \mathbb{Z}^+ $}
+}
+\newglossaryentry{s}
+{
+    name={$ \$ $},
+    description={A random substitute for a variable}
+}
+\newglossaryentry{ss}
+{
+    name={$ s_i / s_j $},
+    description={A key stream, $ s_i, s_j \in {\left( 0, 1 \right)}^\omega $}
+}
+\newglossaryentry{sss}
+{
+    name={$ s'_i / s'_j $},
+    description={A masked key stream, $ s'_i, s'_j \in {\left( 0, 1 \right)}^\omega $}
+}
+\newglossaryentry{ssss}
+{
+    name={$ \sigma $},
+    description={The length of the encoded set of indices $ I' $. $ \sigma \in \mathbb{Z}^+ $}
+}
+\newglossaryentry{t}
+{
+    name={$ t $},
+    description={The vector distance threshold, $ t \in \mathbb{R}^+ $}
+}
+\newglossaryentry{tt}
+{
+    name={$ \tau $},
+    description={A time budget for the protocol initiation}
+}
+\newglossaryentry{ttt}
+{
+    name={$ \theta $},
+    description={The combined number of unique values in all the records $ R^{\mathrm{values}}_{\iota} $},
+    sort=t
+}
+\newglossaryentry{u}
+{
+    name={$\mathcal{U}$},
+    description={The identity of the user of the client},
+    sort=U
+}
+\newglossaryentry{uu}
+{
+    name={$ \upsilon $},
+    description={A set of already retrieved indices}
+}
+\newglossaryentry{v}
+{
+    name={$ v / v_j $},
+    description={A value in a record $ R^{\mathrm{values}}_{\iota} $},
+    sort=v
+}
+\newglossaryentry{w}
+{
+    name={$ w $},
+    description={A wire in or out to a logic gate}
+}
+\newglossaryentry{x}
+{
+    name={$ X $},
+    description={An arbritrary set of elements}
+}
+\newglossaryentry{xx}
+{
+    name={$ \Xi $},
+    description={A tuple of system parameters of the server}
+}
+\newglossaryentry{xxx}
+{
+    name={$ x $},
+    description={A finite field element}
+}
+\newglossaryentry{y}
+{
+    name={$ Y $},
+    description={A set of elements}
+}
+\newglossaryentry{yy}
+{
+    name={$ y $},
+    description={A finite field element}
+}
+\newglossaryentry{z}
+{
+    name={$ z $},
+    description={A natural number}
+}
+\newglossaryentry{zz}
+{
+    name={$ \zeta_i $},
+    description={A server with a share of a replicated database}
+}
+
+
+\glsaddall
+
+\makeatletter
+% Remove right hand margin in algorithm
+\patchcmd{\@algocf@start}% <cmd>
+  {-1.5em}% <search>
+  {0pt}% <replace>
+  {}{}% <success><failure>
+\makeatother
+
+\tikzset{Dotted/.style={% https://tex.stackexchange.com/a/52856/194703
+    line width=1pt,
+    dash pattern=on 0.01\pgflinewidth off #1\pgflinewidth,line cap=round,
+    shorten >=0.3em,shorten <=0.3em},
+    Dotted/.default=5}
+\usetikzlibrary{arrows.meta,calc,positioning}
+\definecolor{light_gray}{RGB}{150,150,150}
+\definecolor{dark_gray}{RGB}{100,100,100}
+
+\author{Benjamin Hansen Mortensen}
+\title{Private Database Search}
+\subtitle{}
+
+\newcounter{savepage}
+
+\begin{document}
+\pagenumbering{Roman}
+\uiomasterfp[program={Information Security}, fac={Faculty of Mathematics and Natural Sciences \newline University of Oslo \newline \newline Cybersecurity and Cyberoperations \newline Strategic Analyses and Joint Systems division \newline Norwegian Defence Research Establishment}, date={\today}, supervisors={Martin Strand\and Håkon Jacobsen}, image={fooCrop.png}]
+
+\input{../summary.tex}
+\input{../acknowledgements.tex}
+
+\tableofcontents
+\cleardoublepage
+\setcounter{savepage}{\arabic{page}}
+\pagenumbering{arabic}
+\input{../Chapter Introduction/chapter_main.tex}
+\input{../Chapter Theory/chapter_main.tex}
+\input{../Chapter Private Database Search/chapter_main.tex}
+\input{../Chapter Proof of Concept/chapter_main.tex}
+\input{../Chapter Protocol/chapter_main.tex}
+\input{../Chapter Program/chapter_main.tex}
+\input{../Chapter Conclusion/chapter_main.tex}
+\cleardoublepage
+\pagenumbering{Roman}
+\setcounter{page}{\thesavepage}
+\cleardoublepage
+\phantomsection
+\addcontentsline{toc}{chapter}{References}
+\printbibliography
+\cleardoublepage
+\phantomsection
+\addcontentsline{toc}{chapter}{Glossary}
+\printnoidxglossaries
+\cleardoublepage
+\input{../Appendices/chapter_main.tex}
+\cleardoublepage
+
+
+%\input{../Presentation_Figures/chapter_main.tex}
+
+\end{document}

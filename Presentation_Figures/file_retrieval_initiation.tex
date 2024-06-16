@@ -1,0 +1,62 @@
+\noindent
+\begin{figure} [H]
+    \centering
+    \captionsetup{justification=centering,margin=1cm}
+    \caption*{\hspace*{3.1cm}\textbf{\LARGE{Communication Flow}}}
+    \begin{tikzpicture}[auto,>=Triangle,font=\sffamily]
+        \node (server) {\Large Server};
+        \node[base left=8cm of server] (client) {\Large Client $ \mathcal{U} $};
+        \coordinate[below=14.79cm of server] (server_ground);
+        \coordinate[below=14.79cm of client] (client_ground);
+        
+        \begin{scope}[line width=3pt,shift={(client_ground)},
+            nodes={above}, draw=dark_gray, x={($(server_ground)-(client_ground)$)},y={($(client.south)-(client_ground)$)}]
+
+            \draw[] (1, 0.9) node (preprocess) {$ D' \gets D.\mathrm{padToLength}\left(n\right)$};
+
+            \draw[] (0, 0.85) node (preprocess) {$ \pi, \eta, K \gets \PreProcess \left( \right) $};
+            \draw[] (1, 0.85) node (preprocess_receive) {$ D' \gets \PreProcess \left( D' \right) $};
+
+            \draw[line width=1pt, light_gray] (0.5, 1) -- (0.5, 0.85);
+
+            \draw[-, line width=2pt, shorten <=2pt, black] (1.2, 0.825) -- (-0.2, 0.825);
+
+            \draw[] (0.5, 0.75) node (title_preprocess) {\Large{$ \PreProcess $:}};
+
+            \draw[] (1, 0.675) node (mn) {$ m, n $};
+            \draw[] (0, 0.675) node (mn_receive) {$ \phantom{m, n} $};
+            \draw[ultra thick, -{Stealth[scale=1]}] (mn) -- (mn_receive);
+
+            \draw[] (0, 0.625) node (preprocess) {$ K \gets \left[ \phantom{=} \right] $};
+
+            \draw[] (0.145, 0.575) node (eta) {$ \eta \gets \left[m + 1, m + 2, \dots, n \right] $};
+
+            \draw[] (0, 0.525) node (preprocess) {\hspace*{2.1cm}$ \mathrm{for} \hspace*{0.25cm} i,j ,b \gets \Sort\left( \pi \right)\colon $};
+
+            \draw[] (0.07, 0.475) node (ij) {$ i, j $};
+            \draw[] (1, 0.475) node (ij_receive) {$ \phantom{ij} $};
+            \draw[ultra thick, -{Stealth[scale=1]}] (ij) -- (ij_receive);
+
+            \draw[] (1, 0.425) node (a) {$ D'_i, D'_j $};
+            \draw[ultra thick, -{Stealth[scale=1]}] (a) -- (0.7, 0.4);
+            \draw[] (0.1, 0.425) node (q) { $ K, i, j, b $};
+            \draw[ultra thick, -{Stealth[scale=1]}] (q) -- (0.3, 0.4);
+
+            \draw[ultra thick, -] (0.1, 0.375) -- (0.9, 0.375);
+            \draw[ultra thick, -] (0.1, 0.375) -- (0.1, 0.29);
+            \draw[ultra thick, -] (0.9, 0.375) -- (0.9, 0.29);
+            \draw[ultra thick, -] (0.1, 0.29) -- (0.9, 0.29);
+
+            \draw[] (0.5, 0.3) node {\large \underline{Private Swap:}};
+
+            \draw[] (1, 0.19) node (I) {$ C_i, C_j $};
+            \draw[ultra thick, -{Stealth[scale=1]}] (0.7, 0.265) -- (I);
+
+            \draw[] (1, 0.14) node (I) {$ D'_i, D'_j \gets C_i, C_j $};
+
+
+
+        \end{scope}
+    \end{tikzpicture}
+    \label{ill:FileRetrievalInitiation}
+\end{figure}

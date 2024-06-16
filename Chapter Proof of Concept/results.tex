@@ -1,0 +1,74 @@
+\section{Results}
+\label{sec:proofofconceptResults}
+%\addcontentsline{toc}{section}{Results}
+
+We now have the completed protocol, so let us implement it and perform some experiments. The experiment aims to determine which of MP-SPDZ's programs, i.e., generic \acrshort{mpc} protocols, yield the most efficient execution. We only test the ones that match our modeling, dishonest majority with semi-honest adversaries in the two-party setting. Given the data we get from the experiments, we discuss a way of better describing the efficiency of this protocol. Lastly, we discuss important considerations that the extracted metric from the experiments do not directly reflect.
+
+\newcommand{\BigO}{\ensuremath{\mathsf{{O}}}}
+The realization of the program deviates from the pseudocode's mid-level abstraction as we cannot branch, use dynamic data structures or index on hidden values. An algorithm for the solution implemented in MP-SPDZ is located in Appendix \hyperref[apx:proofofconceptSearchRetrieve]{B}. Among the more significant differences is that the indexing $ A $ is padded such that all the arrays of digests are the same length $ \sigma $. Secondly, the database $ D $, consisting of the records as characters, was padded such that all the arrays were of length $ \omega = 6016 $. We chose $ \omega $ as the maximum length any \acrshort{pnr} could have, which introduces significant redundancy, making the average record two to three times larger. The computational complexity for $ \Search $ ended up being $ \BigO \left( m \cdot \sigma \right) $, and for $ \Retrieve $ it is $ \mathcal{O} \left( m \cdot \omega \right) $. This amortization alone does not answer the question of feasibility, so let us discuss the data from the experiments.
+
+We combine \cref{algo:Searching} ($ \Search $) and \cref{algo:Retrieval} ($ \Retrieve $) into one implementation as the results $ I $ from $ \Search $ can be directly passed to $ \Retrieve $. This means that we produce and supply $ A $, $ q' $, and $ D $ into MP-SPDZ simultaneously. Respectively, the server runs \cref{algo:Indexing} ($ \Filter $), and the client runs \cref{algo:EncodingTheSearchQuery} (search query encoding). Together they execute the combination of \cref{algo:Searching} ($ \Search $) and \cref{algo:Retrieval} ($ \Retrieve $). We instantiate $ \Hash $ as SHA256.
+
+\begin{figure} [tbh]
+    \caption{Proof of Concept - Runtimes}
+    \label{fig:ProofOfConceptRuntimes}
+    \centering
+    \begin{tikzpicture}
+        \begin{axis}[
+            xlabel={Number of Records $ m $},
+            ylabel={seconds},
+            grid=major,
+            cycle list name=black white,
+            legend entries={semi-party.x, hemi-party.x, temi-party.x, soho-party.x},
+            legend pos=outer north east
+        ]
+        
+
+        \addplot table {../Chapter Proof of Concept/Data/semi_party.txt};
+        \addplot table {../Chapter Proof of Concept/Data/hemi_party.txt};
+        \addplot table {../Chapter Proof of Concept/Data/temi_party.txt};
+        \addplot table {../Chapter Proof of Concept/Data/soho_party.txt};
+        \end{axis}
+    \end{tikzpicture}
+\end{figure}
+
+For this program, we are only interested in the runtime of the algorithms implemented using generic \acrshort{mpc}. MP-SPDZ provides us with a few different programs to test with, and of course, we want to figure out which of these provides us with the fastest execution. We take the benchmark metrics directly from MP-SPDZ as our results, but only consider programs that offer security for a dishonest majority with semi-honest adversaries. With the results, we are only concerned with the magnitude of the runtime; hence, a single execution suffices.
+
+The results, \cref{fig:ProofOfConceptRuntimes} and \cref{Tab: Proof of Concept benchmarking}, show that semi-party.x yields the fastest runtime. It can perform a search query on one hundred records in 36.5 seconds, which might seem promising initially, but the number of records alone is an imprecise metric. A better metric for discussing the feasibility is to talk about the total byte size of the database. That is the number of records multiplied by the size of the records. For simplicity and to better communicate the actual throughput of the program, we use the size of the padded records. Hence, $ m * \omega $ is how we calculate the total size. The use of $ \omega $  abstracts away the redundant data added by padding the records, which separates the problem of how to efficiently pad the records into a separate discussion. Performing the calculation $ m * \omega = 100 \cdot 6016 $ (one character is one byte) gives us a database size of 601.6 kilobytes. Scaling this up, we find that we can perform a single search query in time budget $ \tau = $ eight hours on a database of size 300 megabytes. An interesting observation is that MP-SPDZ provides the total communication costs for the execution. We find that the difference between the inputs we provide to MP-SPDZ and the total communication costs is more than a factor of a hundred. This high communication cost comes from the additional communication required to compute, in our case, many multiplication operations.
+
+Apart from the runtime, there are valuable considerations that the data above does not reflect: 1) The MP-SPDZ part of the program has to be recompiled before each execution as the number of values in the records, $ \sigma $, varies depending on the records in the database. A solution would be to choose $ \sigma $ as the maximum possible number of values a record could have, but this would introduce even more redundant data. 2) We observe that the inability to have dynamic storage structures, indexing on secret values, and branching forces us to develop a solution that does more work than ideal. For example, we have to structure our data to skip a loop in \cref{algo:RetrieveAndSearch} ($ \Search $ \& $ \Retrieve $) since we cannot index on secret values. Furthermore, we also have to loop over the whole array of $ I $ of length $ m $ instead of dynamically being able to append non-zero indices to it. \footnote{A set-like data structure and a dynamic array can be achieved using \acrshort{oram} in MP-SPDZ, but from testing, these solutions yield much worse results in terms of runtime.}
+
+\begin{center}
+    \begin{table} [tbh]
+        \centering
+        \begin{threeparttable}
+            \caption{Proof of Concept - Benchmarking}
+            \label{Tab: Proof of Concept benchmarking}
+            \begin{tabular}{|c | c | c | c|} 
+            \hline
+            Program & Number of Records ($ m $) & Runtime (\si{\second}) & Total comm. (\si{\mega\byte}) \\ [0.5ex] 
+            \hline\hline
+            \multirow{3}{4em}{semi-party.x} & 1 & 0.336 & 0.67 \\
+             & 10 & 3.646 & 7.29 \\
+             & 100 & 36.538 & 73.08 \\ [3ex] 
+            \multirow{3}{4em}{hemi-party.x} & 1 & 2.036 & 4.07 \\
+             & 10 & 17.3 & 34.6 \\
+             & 100 & 173.462 & 346.92 \\ [3ex] 
+            \multirow{3}{4em}{temi-party.x} & 1 & 2.941 & 5.88 \\
+             & 10 & 22.787 & 45.57 \\
+             & 100 & 227.216 & 454.43 \\ [3ex] 
+            \multirow{3}{4em}{soho-party.x}& 1 & 13.914 & 27.38 \\
+             & 10 & 51.346 & 102.69 \\
+             & 100 & 557.26 & 1114.52 \\
+            [1ex]
+            \hline
+            \end{tabular}
+            \begin{tablenotes}
+                \small
+                \item \si{\second} denotes seconds, \si{\mega\byte} denoted megabytes, comm. denotes communcation.
+            \end{tablenotes}
+        \end{threeparttable}
+    \end{table}
+\end{center}
+
+To summarize, the proof of concept indicates that supporting a reasonably large database is possible. However, the constraints introduced by structuring the whole protocol in generic \acrshort{mpc} limit its efficiency.

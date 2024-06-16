@@ -1,0 +1,77 @@
+\section*{Appendix C: Bitonic Sort Secquence Analysis}
+\addcontentsline{toc}{chapter}{Appendix C}
+\label{apx:bitonicsortanalysis}
+
+Referencing our implementation of \href{https://github.com/BenjaminHansenMortensen/PrivateDatabaseSearch/blob/main/src/application/Client/Utilities/bitonic_sort.py}{bitonic sort} on \href{https://github.com/BenjaminHansenMortensen/PrivateDatabaseSearch}{Github}, we want to predict the number of calls to the \acrshort{ps} protocol.
+
+We run the program for a few different values of $ n $ and have the code count the number of calls to the \acrshort{ps} protocol.
+
+\begin{center}
+    \begin{table}[H]
+        \centering
+        \begin{threeparttable}
+            \begin{tabular}{|c | c|} 
+            \hline
+            Database length $ n $ & Number of Private Swaps \\ [0.5ex] 
+            \hline\hline
+             $ 2^1 $ & 1 \\
+             $ 2^2 $ & 6 \\
+             $ 2^3 $ & 24 \\
+             $ 2^4 $ & 80 \\
+             $ 2^5 $ & 240 \\
+             $ 2^6 $ & 672 \\
+             $ 2^7 $ & 1792 \\
+             $ 2^8 $ & 4608 \\
+             $ 2^9 $ & 11520 \\
+             $ 2^{10} $ & 28180 \\
+            [1ex]
+            \hline
+            \end{tabular}
+            \caption{Bitonic Sort \acrshort{ps} Protocol Calls with No Parallelization}
+            \label{tab:bitonicsortSequence}
+        \end{threeparttable}
+    \end{table}
+\end{center}
+
+Using \acrfull{oeis} \cite{Sloane_1964} we identify the sequence A001788 that follows the patterns, and we rewrite it to $ \log_2 $ such that it can take a database length $ n $ as an input, yielding the sequence:
+
+\begin{gather*}
+    a(n) = \frac{n}{4} \cdot \left( \log^2_2 \left( n \right) + \log_2 \left( n \right) \right)
+\end{gather*}
+
+We use the same approach to find the sequence that fits the fully parallelized implementation of bitonic sort. Here we collapse parallelized loops into a single call to the \acrshort{ps} protocol,
+
+
+    \begin{table}[H]
+        \centering
+        \begin{threeparttable}
+            \begin{tabular}{|c | c|} 
+            \hline
+            Database length $ n $ & Number of Private Swaps \\ [0.5ex] 
+            \hline\hline
+             $ 2^1 $ & 1 \\
+             $ 2^2 $ & 3 \\
+             $ 2^3 $ & 6 \\
+             $ 2^4 $ & 10 \\
+             $ 2^5 $ & 15 \\
+             $ 2^6 $ & 21 \\
+             $ 2^7 $ & 28 \\
+             $ 2^8 $ & 36 \\
+             $ 2^9 $ & 45 \\
+             $ 2^{10} $ & 55 \\
+            [1ex]
+            \hline
+            \end{tabular}
+            \caption{Bitonic Sort \acrshort{ps} Protocol Calls with Perfect Parallelization}
+            \label{tab:bitonicsortSequenceParallel}
+        \end{threeparttable}
+    \end{table}
+
+
+We identify the sequence A000217 and rewrite it, yielding the sequence:
+
+\begin{gather*}
+    b(n) = \frac{1}{2} \cdot \left( \log^2_2 \left( n \right) + \log_2 \left( n \right) \right)
+\end{gather*}
+
+We now have $ a(n) $ and $ b(n) $ to approximate the number of private swaps required to sort a database of length $ n $ with bitonic sort.

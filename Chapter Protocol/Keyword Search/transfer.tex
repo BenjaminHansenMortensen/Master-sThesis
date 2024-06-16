@@ -1,0 +1,124 @@
+\refstepcounter{subsection}\subsection*{\thesubsection\quad Transfer}\label{subsec:KeywordSearchTransfer}
+
+In the transfer phase, the client possesses the encrypted auxiliary information $ A' $, which it wants to compare with its search query $ q $. Recall that we want to find the intersection between the values of the records and the search query. $ A' $ consists of tuples $ \left( v'_j, I'_j \right) $ where the first values are the encrypted values of the records; this means that in order for the client to find if $ q $ is equal to any of the values it has to be encrypted under the same key. The key, $ e_1 $, is held by the server, and cannot reveal it to the client. This scenario can be solved with an \acrshort{oprf} as it allows for the oblivious evaluation of the $ \Encrypt $ algorithm, where the server supplies $ e_1 $ and the client $ q $. For simplicity, we implement this functionality through generic \acrshort{mpc}.
+
+Once the client has found which tuple it is interested in, it wants to decrypt the set of encrypted indices associated with that tuple. Recall that the indices $ I'_j $ were encrypted under an ephemeral key $ e_{2,j}  $. The client already knows $ v_j $ but needs it encrypted under the server's key $ e_2 $. Therefore, we use the same \acrshort{oprf} functionality above to encrypt $ v_j $ under $ e_2 $. This gives the client $ e_{2,j} $ in the form of $ q_{e_2} $,  that it can use to decrypt all the indices in $ I'_j $. If an index decrypts to anything other than a valid index on $ D $, it is discarded as a dummy index.
+
+\noindent
+\begin{figure}[H]
+    \begin{minipage}{0.5\textwidth}
+        \RestyleAlgo{ruled}
+        \begin{algorithm}[H]
+            \LinesNumbered
+            \caption{Client $ \mathcal{U} $ - \newline $ \Search $}
+            \label{algo:ClientSearch}
+            \KwIn{$ A' $}
+            \KwIn{$ q $}
+    
+            \KwOut{$ I $}
+    
+            \vspace*{0.48cm}
+    
+            $ q'_i \gets \Hash \left( q_i \right) $
+    
+            \SetKwProg{MPC}{multi-party computation:}{}{end}
+            \MPC{} {
+    
+                \KwIn{$ q'_i $}
+            
+                \KwOut{$ q_{e_1} $}
+    
+                \vspace*{0.48cm}
+    
+                $ q_{e_1} \gets \Encrypt \left( q'_i \right) $
+            }
+    
+            \SetKwProg{MPC}{multi-party computation:}{}{end}
+            \MPC{} {
+    
+                \KwIn{$ q'_i $}
+            
+                \KwOut{$ q_{e_2} $}
+    
+                \vspace*{0.48cm}
+    
+                $ q_{e_2} \gets \Encrypt \left( q'_i \right) $
+            }
+    
+            $ I \gets \left[ \phantom{=} \right] $
+    
+            $ I'_j \gets A' $.get$ \left( q_{e_1} \right) $ 
+    
+            \For{$ \iota' $ in $ I'_j $}{
+    
+                $ \iota \gets \Decrypt \left( \iota', q_{e_2} \right) $
+    
+                $ I $.add$ \left( \iota \right) $
+            }
+    
+            \vspace*{0.48cm}
+    
+            \KwRet{$ I $}
+    
+        \end{algorithm}
+    \end{minipage}
+    \begin{minipage}{0.49\textwidth}
+        \RestyleAlgo{ruled}
+        \begin{algorithm}[H]
+            \LinesNumbered
+            \caption{Server - \newline $ \Search $}
+            \label{algo:ServerSearch}
+            \KwIn{$ e_1, e_2 $ \phantom{$ A' $}}
+    
+            \vspace*{0.48cm}
+    
+            \KwOut{$ $}
+    
+            \vspace*{0.48cm}
+    
+            \phantom{$ q'_i \gets \Hash \left( q_i \right) $}
+    
+            \SetKwProg{MPC}{multi-party computation:}{}{end}
+            \MPC{} {
+    
+                \KwIn{$ e_1 $ \phantom{$ q'_i $}}
+            
+                \KwOut{\phantom{$ q_{e_1} $}}
+    
+                \vspace*{0.48cm}
+    
+                $ \Encrypt \left( e_1 \right) $
+            }
+    
+            \SetKwProg{MPC}{multi-party computation:}{}{end}
+            \MPC{} {
+    
+                \KwIn{$ e_2 $ \phantom{$ q'_i $}}
+            
+                \KwOut{\phantom{$ q_{e_2} $}}
+    
+                \vspace*{0.48cm}
+    
+                $ \Encrypt \left( e_2 \right) $
+            }
+    
+            \phantom{$ I \gets \left[ \phantom{=} \right] $}
+    
+            \phantom{$ I'_j \gets A $.get$ \left( q_{e_1} \right) $}
+    
+            \phantom{$ i' $ in $ I'_j $}
+    
+            \phantom{$ i \gets \Decrypt \left( i', q_{e_2} \right) $}
+    
+            \phantom{$ I $.add$ \left( i \right) $}
+            
+            \hfill
+    
+            \vspace*{0.48cm}
+    
+            \KwRet{}
+    
+        \end{algorithm}
+    \end{minipage}
+\end{figure}
+

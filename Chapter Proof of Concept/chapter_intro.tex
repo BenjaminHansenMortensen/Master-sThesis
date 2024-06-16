@@ -1,0 +1,8 @@
+A natural place to begin is to build a proof of concept protocol out of generic \acrshort{mpc}. In it, we only focus on the question of feasibility and, therefore, only look at the privacy properties as we want to establish a baseline to compare against later protocols. The protocol treats generic \acrshort{mpc} as an ideal black box for computation by simultaneously giving it all the inputs, thereby giving us valuable information about the intricacies and limitations of such an approach. We do not consider the $ \Setup $ algorithm, and we merge the remaining algorithms into two main steps: 
+
+\begin{enumerate}
+    \item Match the client's search query with the relevant records, consisting of algorithms $ \Filter $ and $ \Search $.
+    \item Retrieve those relevant records from the server, consisting of algorithms $ \Encode $, $ \Retrieve $, and $ \Decode $.
+\end{enumerate}
+ 
+Instead of describing our inputs at a high level of abstraction, we work directly with a realized database and searches on that database; therefore, we have to introduce additional steps along the way for it all to fit together. In doing so, we bridge the gap between a protocol's description and its realization, allowing us to present precise metrics for the efficiency of the protocol. In the end, an assessment of the security and feasibility of the protocol is conducted so that we can highlight potential improvements.

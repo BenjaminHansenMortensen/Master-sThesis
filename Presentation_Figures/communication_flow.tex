@@ -1,0 +1,86 @@
+\noindent
+\begin{figure} [H]
+    \centering
+    \captionsetup{justification=centering,margin=1cm}
+    \caption*{\hspace*{3.3cm}\textbf{\LARGE{Communication Flow}}}
+    \begin{tikzpicture}[auto,>=Triangle,font=\sffamily]
+        \node (server) {\Large Server};
+        \node[base left=8cm of server] (client) {\Large Client $ \mathcal{U} $};
+        \coordinate[below=14.79cm of server] (server_ground);
+        \coordinate[below=14.79cm of client] (client_ground);
+        
+        \begin{scope}[line width=3pt,shift={(client_ground)},
+            nodes={above}, draw=dark_gray, x={($(server_ground)-(client_ground)$)},y={($(client.south)-(client_ground)$)}]
+            \draw[] (1, 0.9) node (setup) {$ \Xi \gets \Setup \left( D \right) $};
+            \draw[] (0, 0.9) node (setup_receive) {\phantom{$ \left( A \right) $}};
+            \draw[ultra thick, -{Stealth[scale=1]}] (setup) -- (setup_receive);
+
+            \draw[] (1, 0.825) node (preprocess) {$ D' \gets \PreProcess \left( D \right) $};
+            \draw[] (0, 0.825) node (preprocess_receive) {$ \pi, \eta, K \gets \PreProcess \left( \right) $};
+
+            \draw[] (1, 0.75) node (filter) {$ A \gets \Filter \left( \mathcal{U}, D \right) $};
+            \draw[] (0, 0.75) node (filter_receive) {\phantom{$ \left( A \right) $}};
+
+            \draw[] (1, 0.675) node (filter) {$ A' \gets \Garble \left( A \right) $};
+            \draw[] (0, 0.675) node (filter_receive) {\phantom{$ \left( A' \right) $}};
+            \draw[ultra thick, -{Stealth[scale=1]}] (filter) -- (filter_receive);
+
+            \draw[] (-0.2, 0.625) node (title_setup) {\large{ $ \uparrow $ \textit{Initiation}}};
+
+            \draw[densely dotted,line width=1.5pt, shorten <=2pt, light_gray] (1.2, 0.612) -- (-0.2, 0.612);
+
+            \draw[] (-0.2, 0.562) node (title_setup) {\large{$ \downarrow $\textit{Transfers}}};
+
+            \draw[] (0, 0.5) node (search) {$ I_1 \gets \Search \left( A', q_1 \right) $};
+            \draw[] (1, 0.5) node (search_receive) {\phantom{$ \left( A' \right) $}};
+
+            \draw[] (1.2, 0.5) node (title_search) {\large{\textit{Search} $ \uparrow $}};
+
+            \draw[densely dotted,line width=1.5pt, shorten <=2pt, light_gray] (1.2, 0.487) -- (-0.2, 0.487);
+
+            \draw[] (0, 0.425) node (encode) {$ I'_1 \gets \Encode \left( I_1, \pi, \eta, \upsilon \right) $};
+            \draw[] (1, 0.425) node (encode_receive) {\phantom{$ \left( A \right) $}};
+            \draw[ultra thick, -{Stealth[scale=1]}] (encode) -- (encode_receive);
+
+            \draw[] (1, 0.35) node (retrieve) {$ F'_1 \gets \Retrieve \left( D', I'_1 \right) $};
+            \draw[] (0, 0.35) node (retrieve_receive) {\phantom{$ \left( A \right) $}};
+            \draw[ultra thick, -{Stealth[scale=1]}] (retrieve) -- (retrieve_receive);
+
+            \draw[] (0, 0.275) node (decode) {$ F_1 \gets \Decode \left( F'_1, K \right) $};
+            \draw[] (1, 0.275) node (decode_receive) {\phantom{$ \left( A \right) $}};
+
+            \draw[] (1.2, 0.275) node (title_retrieval) {\large{\textit{Retrieval} $\uparrow $}};
+
+            \draw[densely dotted,line width=1.5pt, shorten <=2pt, light_gray] (1.2, 0.275) -- (-0.2, 0.275);
+
+            \draw[line width=1pt, light_gray] (0.5, 1) -- (0.5, 0.275);
+            \draw[-,Dotted=8,line width=2pt, shorten <=2pt, light_gray] (0.5, 0.25) -- (0.5, 0.175);
+            \draw[line width=1pt, light_gray] (0.5, 0.15) -- (0.5, -0.15);
+
+            \draw[] (0, 0.075) node (search_k) {$ I_k \gets \Search \left( A', q_k \right) $};
+            \draw[] (1, 0.075) node (search_k_receive) {\phantom{$ \left( A' \right) $}};
+
+            \draw[densely dotted,line width=1.5pt, shorten <=2pt, light_gray] (1.2, 0.15) -- (-0.2, 0.15);
+
+            \draw[] (1.2, 0.075) node (title_search2) {\large{\textit{Search} $ \uparrow $}};
+
+            \draw[densely dotted,line width=1.5pt, shorten <=2pt, light_gray] (1.2, 0.062) -- (-0.2, 0.062);
+
+            \draw[] (0, 0) node (encode_k) {$ I'_k \gets \Encode \left( I_k, \pi, \eta, \upsilon \right) $};
+            \draw[] (1, 0) node (encode_k_receive) {\phantom{$ \left( A \right) $}};
+            \draw[ultra thick, -{Stealth[scale=1]}] (encode_k) -- (encode_k_receive);
+
+            \draw[] (1, -0.075) node (retrieve_k) {$ F'_k \gets \Retrieve \left( D', I'_k \right) $};
+            \draw[] (0, -0.075) node (retrieve_k_receive) {\phantom{$ \left( A \right) $}};
+            \draw[ultra thick, -{Stealth[scale=1]}] (retrieve_k) -- (retrieve_k_receive);
+
+            \draw[] (0, -0.15) node (decode_k) {$ F_k \gets \Decode \left( F'_k, K \right) $};
+            \draw[] (1, -0.15) node (decode_k_receive) {\phantom{$ \left( A \right) $}};
+
+            \draw[] (1.2, -0.15) node (title_retrieval2) {\large{\textit{Retrieval} $ \uparrow $}};
+
+            \draw[densely dotted,line width=1.5pt, shorten <=2pt, light_gray] (1.2, -0.15) -- (-0.2, -0.15);
+        \end{scope}
+    \end{tikzpicture}
+    \label{ill:CommunicationFlow}
+\end{figure}

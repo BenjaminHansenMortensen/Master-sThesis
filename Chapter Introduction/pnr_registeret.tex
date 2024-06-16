@@ -1,0 +1,25 @@
+\section{The Passenger Name Record Registry}
+\label{sec:pnr}
+%\addcontentsline{toc}{section}{PNR-registeret}
+
+Chapter 60 of Politiregisterforskriften introduced the \acrshort{pnr} registry with regulation changes FOR-2022-04-29-646. Its purpose, described in section 60-1 of the regulation, is to contribute to preventing, discovering, investigating, and legislating acts of terror and severe crimes by storing \acrshort{pnr}s  collected from airlines in a registry. A \acrshort{pnr} is a record containing information about passengers for a given itinerary. section 60-5  outlines the information a \acrshort{pnr} can contain, including a passenger's name, phone number, address, or luggage information. The interesting subsection to us is subsection 60-6 (3) as records are allowed to be shared with other competent authorities, a term which includes most of the security services, given sufficient justification. We can imagine a case where this justification contains classified information, thus preventing it from being shared.
+
+Each security service is subject to auditing to ensure they adhere to regulations. By the nature of auditing, we can infer that they behave honestly, but honest behavior does not prevent curiosity. Thus, appointing a trusted person to review the justifications containing classified information could be too risky for some authorities, leading them not to take advantage of the \acrshort{pnr} registry. We refer to this as the problem throughout our work, and it implies one of three options: 1) The purpose of the \acrshort{pnr} registry, section 60-1, cannot sufficiently be fulfilled. Alternatively, 2) there are contradictions between the regulations that some security services are subject to and Politiregisterloven. Or, 3) the current solution used to process requests hinders cooperation and limits the usefulness of the \acrshort{pnr} registry. We assume option 3) and want to identify what an improved solution should provide. 
+
+We describe the \acrshort{pnr} register as a database stored on a server. The client's user is a security service that performs a search on the database and retrieves the resulting record(s), where:
+
+\begin{enumerate}
+    \item The client does not learn anything about the records on the database except for the records from the search.
+    \item The server does not learn anything about the search and the retrieved records.
+\end{enumerate}
+
+For the solution's functionality to be most helpful it should allow for integration with various types of searches that are present in modern search engines, we want two types:
+
+\begin{enumerate}
+    \item Keyword search
+    \item Semantic search
+\end{enumerate}
+
+This work focus on the feasibility of solutions, which does not limit us to finding the best solution but allows us to explore possible practical solutions. We, therefore, implicitly factor in additional aspects like ease of implementation, multipurpose, user-friendliness, simplicity, security (with an emphasis on post-quantum security), functionality, and expandability. These crucial aspects must be integrated into the design to lay the groundwork for future research.
+
+We summarize everything into the following statement: It is feasible to use secure computation to enhance the privacy and capability of queries on the \acrshort{pnr} registry compared to today's disclose all approach, with respect to Politiregisterforskriften chapter 60, under the constraints of a two-party setting with communication over \acrfull{lan} and with security against semi-honest adversaries.

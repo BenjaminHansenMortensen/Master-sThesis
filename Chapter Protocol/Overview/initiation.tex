@@ -1,0 +1,98 @@
+\refstepcounter{subsection}\subsection*{\thesubsection\quad Initiation}\label{subsec:OverviewInitiation}
+
+The initiation intends to preprocess as much as possible before the transfers. In it, a couple of things happen, showcased by \cref{fig:OverviewPreProcess}. The server fills the database $ D $ with dummy records such that it is of length $ n $ and pads all its records to a fixed length. Once that is done, the $ \PreProcess $ algorithm encrypts the database under the client's keys $ K $ and sort it according to some random permutation $ \pi $ that the client gets by running $ \Permute $. $ \PreProcess $ achieves this by internally using $ \Sort $ and $ \Encrypt $. The idea is that the sorting is done obliviously to the server and that the encryption of the files is oblivious to the client, without the server learning $ K $ and the client learning the contents of $ D $. At the end, the server is left with the encoded database $ D' $ where it cannot correlate the ciphertexts in $ D' $ to the records in $ D $.
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[auto,>=Triangle,font=\sffamily]
+        \node (server) {\Large Server $ \phantom{\left( \mathcal{U} \right)} $ };
+        \node[base left=4cm  of server] (client) {\Large Client $ \left( \mathcal{U} \right) $};
+        \coordinate[below=8cm of server] (server_ground);
+        \coordinate[below=8cm of client] (client_ground);
+        
+        \begin{scope}[line width=3pt,shift={(client_ground)},
+            nodes={above}, draw=dark_gray, x={($(server_ground)-(client_ground)$)},y={($(client.south)-(client_ground)$)}]
+            \draw[] (1, 0.9) node (setup) {$ \Xi \gets \Setup \left( D \right) $};
+            \draw[] (0, 0.9) node (setup_receive) {\phantom{$ \left( A \right) $}};
+            \draw[ultra thick, -{Stealth[scale=1]}] (setup) -- (setup_receive);
+
+            \draw[] (1, 0.825) node (filter) {$ D $};
+            \draw[ultra thick, -{Stealth[scale=1]}] (filter) -- (0.7, 0.725);
+            \draw[] (0, 0.75) node (filter) {$ \pi $};
+            \draw[ultra thick, -{Stealth[scale=1]}] (filter) -- (0.2, 0.725);
+            \draw[] (0, 0.825) node (q) { $ K $};
+            \draw[ultra thick, -{Stealth[scale=1]}] (q) -- (0.3, 0.725);
+
+            \draw[ultra thick, -] (0.1, 0.7) -- (0.9, 0.7);
+            \draw[ultra thick, -] (0.1, 0.7) -- (0.1, 0.475);
+            \draw[ultra thick, -] (0.9, 0.7) -- (0.9, 0.475);
+            \draw[ultra thick, -] (0.1, 0.475) -- (0.9, 0.475);
+
+            \draw[] (0.5, 0.6) node (search) {\large \underline{MPC:}};
+
+            \draw[] (0.5, 0.5) node (search) {$ D', K, \pi, \eta \gets \PreProcess \left( D \right) $};
+
+            \draw[] (1, 0.3) node (decode) {$ D' $};
+            \draw[ultra thick, -{Stealth[scale=1]}] (0.7, 0.45) -- (decode);
+
+            \draw[] (0, 0.3) node (decode) {$ \pi, \eta, K $};
+            \draw[ultra thick, -{Stealth[scale=1]}] (0.3, 0.45) -- (decode);
+
+            \draw[line width=1pt, light_gray] (0.5, 1) -- (0.5, 0.7);
+            \draw[line width=1pt, light_gray] (0.5, 0.475) -- (0.5, 0.3);
+        \end{scope}
+    \end{tikzpicture}
+    \captionsetup{justification=centering,margin=1cm}
+    \caption{The communication flow between the client and the server in the database initiation (for clarity this overview is simplified).}
+    \label{fig:OverviewPreProcess}
+\end{figure}
+
+Next we do more preprocessing to set up the two types of searches. In both types, the $ \Filter $ algorithm will be used to derive some auxiliary information $ A $ about the database, but the implementation of $ \Filter $ will differ. 
+
+For the first type, keyword search, \cref{fig:OverviewInitKeywordSearch}, the server will create an indexing that is encrypted, using $ \Garble $, and then send it to the client. $ \Garble $ internally uses some implementation of $ \Encrypt $ and $ \Hash $ to encrypt elements. This encryption will happen with two keys, $ e_1 $ and $ e_2 $. To enforce the access control the server will filter values when creating the indexing, based upon the client's identity $ \mathcal{U} $. 
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[auto,>=Triangle,font=\sffamily]
+        \node (server) {\Large Server $ \phantom{\left( \mathcal{U} \right)} $ };
+        \node[base left=4cm  of server] (client) {\Large Client $ \left( \mathcal{U} \right) $};
+        \coordinate[below=10cm of server] (server_ground);
+        \coordinate[below=10cm of client] (client_ground);
+        
+        \begin{scope}[line width=3pt,shift={(client_ground)},
+            nodes={above}, draw=dark_gray, x={($(server_ground)-(client_ground)$)},y={($(client.south)-(client_ground)$)}]
+            \draw[] (1, 0.9) node (filter) {$ A \gets \Filter \left( \mathcal{U}, D \right) $};
+            \draw[] (1, 0.825) node (garble) {$ A' \gets \Garble \left( A, e_1, e_2 \right) $};
+            \draw[] (0, 0.825) node (garble_receive) {\phantom{$ \left( A \right) $}};
+            \draw[ultra thick, -{Stealth[scale=1]}] (garble) -- (garble_receive);
+
+            \draw[line width=1pt, light_gray] (0.5, 1) -- (0.5, 0.8);
+        \end{scope}
+    \end{tikzpicture}
+    \captionsetup{justification=centering,margin=1cm}
+    \caption{The communication flow between the client and the server in the keyword search initiation.}
+    \label{fig:OverviewInitKeywordSearch}
+\end{figure}
+
+In the second type, semantic search, we use a \acrshort{llm}, denoted $ \Gamma $, to create vector embeddings of each record. These embeddings are stored with the corresponding index of the records. The access control is enforced by the server filtering information from the records before supplying it to $ \Gamma $, thereby only capturing the intended semantics in the vector embeddings.
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[auto,>=Triangle,font=\sffamily]
+        \node (server) {\Large Server $ \phantom{\left( \mathcal{U} \right)} $ };
+        \node[base left=4cm  of server] (client) {\Large Client $ \left( \mathcal{U} \right) $};
+        \coordinate[below=10cm of server] (server_ground);
+        \coordinate[below=10cm of client] (client_ground);
+        
+        \begin{scope}[line width=3pt,shift={(client_ground)},
+            nodes={above}, draw=dark_gray, x={($(server_ground)-(client_ground)$)},y={($(client.south)-(client_ground)$)}]
+            \draw[] (1, 0.9) node (setup) {$ A \gets \Filter \left( \mathcal{U}, D, \Gamma \right) $};
+            \draw[] (0.1, 0.9) node (setup_receive) {\phantom{$ \left( A \right) $}};
+
+            \draw[line width=1pt, light_gray] (0.5, 1) -- (0.5, 0.875);
+        \end{scope}
+    \end{tikzpicture}
+    \captionsetup{justification=centering,margin=1cm}
+    \caption{The communication flow between the client and the server in semantic search initiation.}
+    \label{fig:OverviewInitSemanticSearch}
+\end{figure}

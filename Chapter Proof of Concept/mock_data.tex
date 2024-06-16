@@ -1,0 +1,43 @@
+\section{Mock Passenger Name Records} \label{sec:MockPassengerNumberRecords}
+%\addcontentsline{toc}{section}{Mock Passenger Number Records}
+
+We have to fill database $ D $ with records. These records could be files with various structures, but let us use a concrete example. It is important to emphasize that the protocols presented in this work are not tied to the specific contents of the records. In a general sense, the only requirement we impose is that a record $ R_{\iota} $ is representable in two ways: 1) The searchable information in a record, $ R^{\mathrm{\mathrm{values}}}_i $, which is an array of all the values or attributes specific to a record. E.g: $ R^{\mathrm{values}}_{\iota} \gets \left[ \text{"Oslo", 1970-01-01, 1} \right]$. 2) The bytes that make up the records, $ R^{\mathrm{chars}}_{\iota} $, an array with all the individual bytes encoded as characters that make up a record. E.g:  $ R^{\mathrm{values}}_{\iota} \gets \left[ \text{", O, s, l, o, ", ,, , 1, 9, 7, 0, -, 0, 1, -, 0, 1, ,, , 1} \right]$.
+
+Recall that section 60-5 in Politiregisterforskriften outlines the registered information in a \acrshort{pnr}. We use these bullet points to create synthetic mock records. Semantically, we can think of a mock record as information related to a passenger's booking of a trip for one or more people. A record contains information including payment information, the travel plan, and general information about the passengers. We represent each mock record with a well-defined structure of key-value pairs. Some keys, like the \textit{PNR Number}, have a unique value to each record, while others, like \textit{Name}, can have the same value across multiple records. The structure of the records is as follows, where keys are in bold and an indentation indicates sub-keys of a key (A sample record can be found in Appendix \hyperref[apx:mockrecord]{A}): 
+
+\begin{description}
+    \item[PNR Number:] Cf. 60-5. 1. A unique number is given to each record.
+    \item[Payment Information:] Cf. 60-5 6. Information related to the payment.
+    \begin{description}
+        \item[Ticket Number:] Cf. 60-5. 13. A unique nine-digit number given to a ticket.
+        \item[Date:] Cf. 60-5. 2. \& 3. \& 13. The date and time of the payment.
+        \item[Name:] Cf. 60-5. 4. \& 17. The full name of a person.
+        \item[Address:] Cf. 60-5. 5. The billing address.
+        \item[Phone Number:] Cf. 60-5. 5. Phone number of a person.
+        \item[Email:] Cf. 60-5. 5. Email address of a person.
+        \item[Vendor:] Cf. 60-5. 6. The vendor of the credit or debit card used.
+        \item[Type:] Cf. 60-5. 6. Credit or debit.
+        \item[Bonus Program:] Cf. 60-5. 8. Associated bonus program.
+    \end{description}
+    \item[Airline:] Cf. 60-5. 9. The airline providing the flight(s).
+    \item[Travel Agency:] Cf. 60-5. 9. The travel-agency facilitating the trip.
+    \item[Travel Plan:] Cf. 60-5. 7. The travel plan for the passengers.
+    \begin{description}
+        \item[IATA Code:] The IATA codes of the airports.
+        \item[Airport Name:] The name of the airports.
+        \item[City:] The city location of the airports.
+        \item[Time:] Time of arrival/departure of the flights.
+    \end{description}
+    \item[Passengers:] Associated passengers with the record.
+    \begin{description}
+        \item[Name:] Cf. 60-5. 4. \& 17. The full name of the person.
+        \item[Statuses:] Cf. 60-5. 10. The status of the passenger for a given flight. 
+        \item[Seat:] Cf. 60-5. 14. The seat each passenger has on a flight. 
+        \item[Luggage:] Cf. 60-5. 16. The luggage and its weight registered to a passenger.
+        \begin{description}
+            \item[Cabin:] Luggage brought into the plane.
+            \item[Checked:] Luggage transported in the plane's hold.
+            \item[Special:] Special category luggage.
+        \end{description}
+    \end{description}
+\end{description}

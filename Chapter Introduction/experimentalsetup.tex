@@ -1,0 +1,7 @@
+\section{Experimental Setup}
+\label{sec:experimentalsetup}
+%\addcontentsline{toc}{section}{Experimental setup}
+
+An essential part of verifying the feasibility of protocols is implementing them as programs to use in experiments. These experiments aim to gather metrics that describe the various aspects of the solutions. The metrics are necessary to expose the overall practicability and to see the implications of design choices. They also reveal potentially missed or new challenges as we remove layers of abstractions when implementing a protocol as a program.
+
+To not present misleading experimental results, we choose to use consumer-grade hardware. We perform the experiments on a laptop with a four-core \acrfull{cpu} with eight threads and a \acrfull{ram} capacity of eight gigebytes. In software, we implement algorithms using Python 3.10 and MP-SPDZ \cite{CCS:Keller20} 0.3.8. In each experiment there are two parties, a client and a server, that both are run locally on a single laptop to eliminate most network instabilities and bottlenecks. We use the default value for the security parameters $ \lambda = 40 $ (bits) in MP-SDPZ.

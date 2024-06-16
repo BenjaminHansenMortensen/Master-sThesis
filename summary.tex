@@ -1,0 +1,13 @@
+\chapter*{Abstract}
+%\addcontentsline{toc}{chapter}{Abstract}
+
+
+An apparent deadlock arises when a client wants to perform a search containing classified information on a database of classified records, stored on a server, as in order to perform the search, one of the parties has to give up classified information to the other unwillingly. From the literature, we know that this situation is resolvable with the use of \acrfull{mpc}, also known as just secure computation, as it allows the client and server to privately supply their inputs to a computation, in this case a database search, without revealing it to the other party. Together, we explore the case of the \acrfull{pnr} registry and consider whether using \acrshort{mpc} for this purpose is feasible in a two-party setting with communication over \acrfull{lan} and with security against semi-honest adversaries.
+
+In this work, we introduce the new idea of \acrfull{pds}, which extends the better-studied problems of \acrfull{spir} and \acrfull{ot} to achieve a search functionality of the database for the client. 
+
+We propose a new private keyword search protocol that utilizes an inverted index matrix for enhanced efficiency. We also show how semantic search functionality can be achieved in \acrshort{mpc} using a \acrfull{llm}, but efficiency remains a challenge. Additionally, we introduce an \acrshort{ot} protocol that combines oblivious sorting with the new concept of \acrfull{ps} to achieve oblivious retrieval of records. The integration of the search and retrieval protocols culminates in a \acrshort{pds} protocol that we use to address the question of feasibility.
+
+We successfully implemented the proposed \acrshort{pds} protocol and demonstrated the practicality and effectiveness of using \acrshort{mpc} for private database searches. With our implementation, we show that our protocol can support a database size in the order of megabytes, and we project that this capacity can be further increased to gigabytes with a different \acrshort{ps} protocol. 
+
+This work marks the first step towards a suitable solution in the case of the \acrshort{pnr} registry, and we observe that the involvement of jurists and others is necessary to define the proper requirements so that we can increase the capabilities of and the cooperation between the security services.

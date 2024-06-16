@@ -1,0 +1,179 @@
+\section{Proof of Concept Protocol}
+\label{sec:proofofconceptProtocol}
+%\addcontentsline{toc}{section}{Proof of Concept Protocol}
+
+Now that we can generate records to fill our database, we move to the protocol. In the first step, referred to as the search, the $ \Search $ algorithm derives a set of indices by taking a search query $ q $ from the client and some auxiliary information $ A $ from the server as inputs. $ A $ is derived from the database $ D $ using $ \Filter $, and for simplicity, let us assume that there is an open access control policy. In the second step, called the retrieval, we run the $ \Retrieve $ algorithm, which takes the set of encoded indices $ I' $ and the database $ D $ as inputs and outputs the set of encoded records $ F' $ to the client. We use generic \acrshort{mpc} for the computation of $ \Search $ and $ \Retrieve $ therefore the $ \Garble $, $ \Encode$ and $ \Decode $ algorithms are done for us for free
+
+\begin{figure}[tbh]
+    \centering
+    \begin{tikzpicture}[auto,>=Triangle,font=\sffamily]
+        \node (server) {\Large Server $ \phantom{\left( \mathcal{U} \right)} $ };
+        \node[base left=4cm  of server] (client) {\Large Client $ \left( \mathcal{U} \right) $};
+        \coordinate[below=8cm of server] (server_ground);
+        \coordinate[below=8cm of client] (client_ground);
+        
+        \begin{scope}[line width=3pt,shift={(client_ground)},
+            nodes={above}, draw=dark_gray, x={($(server_ground)-(client_ground)$)},y={($(client.south)-(client_ground)$)}]
+            \draw[] (1, 0.9) node (setup) {$ \Xi \gets \Setup \left( D \right) $};
+            \draw[] (0.1, 0.9) node (setup_receive) {\phantom{$ \left( A \right) $}};
+            \draw[ultra thick, -{Stealth[scale=1]}] (setup) -- (setup_receive);
+
+            \draw[] (1, 0.825) node (filter) {$ A \gets \Filter \left( D \right) $};
+            \draw[ultra thick, -{Stealth[scale=1]}] (filter) -- (0.7, 0.725);
+            \draw[] (1, 0.75) node (filter) {$ D $};
+            \draw[ultra thick, -{Stealth[scale=1]}] (filter) -- (0.8, 0.725);
+            \draw[] (0, 0.825) node (q) { $ q' \gets \Hash \left( q \right) $};
+            \draw[ultra thick, -{Stealth[scale=1]}] (q) -- (0.3, 0.725);
+
+            \draw[ultra thick, -] (0.1, 0.7) -- (0.9, 0.7);
+            \draw[ultra thick, -] (0.1, 0.7) -- (0.1, 0.4);
+            \draw[ultra thick, -] (0.9, 0.7) -- (0.9, 0.4);
+            \draw[ultra thick, -] (0.1, 0.4) -- (0.9, 0.4);
+
+            \draw[] (0.5, 0.6) node (search) {\large \underline{MPC:}};
+
+            \draw[] (0.5, 0.5) node (search) {$ I \gets \Search \left( A, q' \right) $};
+
+            \draw[] (0.5, 0.425) node (retrieve) {$ F \gets \Retrieve \left( D, I \right) $};
+
+            \draw[] (0, 0.225) node (decode) {$ F $};
+            \draw[ultra thick, -{Stealth[scale=1]}] (0.3, 0.375) -- (decode);
+
+            \draw[line width=1pt, light_gray] (0.5, 1) -- (0.5, 0.7);
+            \draw[line width=1pt, light_gray] (0.5, 0.4) -- (0.5, 0.225);
+        \end{scope}
+    \end{tikzpicture}
+    \captionsetup{justification=centering,margin=1cm}
+    \caption{The proof of concept protocol's communication flow between the client and the server.}
+\end{figure}
+
+\refstepcounter{subsection}\subsection*{\thesubsection\quad Search}\label{subsec:ProofOfConceptSearching}
+
+
+We must derive some auxiliary information $ A $ about the database in order to search it; therefore, $ A $ takes the form of an indexing. $ R^{\mathrm{values}}_{\iota} $ denote an array of the values in a specific record $ R_{\iota} $. Currently, the values in each record can be whatever, so we want a way to describe them in a standard format. A simple way to fingerprint a value is to produce its hash digest, so that is what we do, and we store the digests in $ A $.
+
+\RestyleAlgo{ruled}
+\begin{algorithm}[tbh]
+    \LinesNumbered
+    \caption{Proof of Concept - $ \Filter $}
+    \label{algo:Indexing}
+    \KwIn{Database $ D = \left[
+            R^{\mathrm{values}}_1, 
+            R^{\mathrm{values}}_2, 
+            ... , 
+            R^{\mathrm{values}}_m
+        \right]  $}
+    \KwOut{Indexing of the database \newline $ A = \left[ 
+            R^{\mathrm{digests}}_1,
+            R^{\mathrm{digests}}_2,
+            ... ,
+            R^{\mathrm{digests}}_m
+        \right] $}
+
+    \vspace*{0.48cm}
+
+    {$ A \gets \lbrack \phantom{=} \rbrack $}
+
+    \For {$ R^{\mathrm{values}}_{\iota} \mathrm{\phantom{|} in \phantom{|}} D $ } { 
+
+        {$ R^{\mathrm{digests}}_{\iota} \gets \left[ \phantom{=} \right] $}
+
+        \For {$ v_j \mathrm{\phantom{|} in \phantom{|}} R^{\mathrm{values}}_{\iota} $} {
+            { $ R^{\mathrm{digests}}_{\iota} $.append$\left( \Hash{\left( v_j \right)}\right)$}
+        }
+
+        {$ A $.append$\left( R^{\mathrm{digests}}_{\iota} \right)$ }
+    }
+
+    \vspace*{0.48cm}
+
+    \KwRet{$ A $}
+\end{algorithm}
+
+The only part remaining in the setup of the inputs is to encode the client's search query $ q $. Similarly to encoding the values, we create a digest of the search query, allowing us to match it with the digests in $ A $.
+
+\RestyleAlgo{ruled}
+\begin{algorithm}[tbh]
+    \LinesNumbered
+    \caption{Proof of concept - Encoding $ q $}
+    \label{algo:EncodingTheSearchQuery}
+    \KwIn{Search query $ q $}
+    \KwOut{Encoded search query $ q' $}
+
+    \vspace*{0.48cm}
+
+    {$ q' \gets \Hash{(q)} $}
+
+    \vspace*{0.48cm}
+
+    \KwRet{$ q' $}
+\end{algorithm}
+
+We compute $ \Search $ using generic \acrshort{mpc}, meaning the client provides $ q' $ and the server $ A $ without revealing their input to the other party.  $ \Search $ outputs a set of indices $ I $ which is revealed to the client. The type of search we want to perform is a keyword search. To do this, we check if $ q' $ matches any digests in $ A $. If it does so, we store the index in $ I $.
+
+\RestyleAlgo{ruled}
+\begin{algorithm}[tbh]
+    \LinesNumbered
+    \caption{Proof of Concept - $ \Search $}
+    \label{algo:Searching}
+    \KwIn{Encoded search query $ q' $}
+    \KwIn{Encoded indexing \newline $ A \gets \left[ 
+            R^{\mathrm{digests}}_1,
+            R^{\mathrm{digests}}_2,
+            ... ,
+            R^{\mathrm{digests}}_m
+        \right] $}
+    \KwOut{Indices $ I $}
+
+    \vspace*{0.48cm}
+
+    {$ I \gets \lbrack \phantom{=} \rbrack $}
+
+    \For {$ R^{\mathrm{digests}}_{\iota} \mathrm{\phantom{|} in \phantom{|}} A $} {
+
+        \For {$ digest \mathrm{\phantom{|} in \phantom{|}} R^{\mathrm{digests}}_{\iota} $} {
+            \If {$ \left( q' = digest \right) \mathrm{\phantom{|} and \phantom{|}} \left( digest \mathrm{\phantom{|} not \phantom{|} in \phantom{|}}  I \right) $} {
+                $ I $.append$\left(i\right)$
+            }
+        }
+    }
+
+    \vspace*{0.48cm}
+
+    \KwRet{$ I $}
+\end{algorithm}
+
+\refstepcounter{subsection}\subsection*{\thesubsection\quad Retrieval}\label{subsec:ProofOfConceptRetrieval}
+
+
+The second step is to retrieve the records for the indices $ I $ that the client learned in the search. We consider the database $ D $ to have the records as an array of characters, $ D = \left[ R^{\mathrm{chars}}_1, R^{\mathrm{chars}}_2, ... , R^{\mathrm{chars}}_m \right] $. Implicitly, the order of the records in the database is the same as in the search. To retrieve the records, we only take the records with an index in $ I $ and add them to the retrieved records at $ F $.
+
+\RestyleAlgo{ruled}
+\begin{algorithm}[tbh]
+    \LinesNumbered
+    \caption{Proof of concept - $ \Retrieve $}
+    \label{algo:Retrieval}
+    \KwIn{Indices $ I $}
+    \KwIn{Database $ D \gets \left[
+            R^{\mathrm{chars}}_1, 
+            R^{\mathrm{chars}}_2, 
+            ... , 
+            R^{\mathrm{chars}}_m
+        \right]  $}
+    \KwOut{Retrieved records $ F $}
+
+    \vspace*{0.48cm}
+
+    $ F \gets \left[ \phantom{=}\right] $
+
+    \For {$ i \in \lbrace 1, 2, ... , m \rbrace $} {
+        \If {$ i $ in $ I $} {
+            $ F $.append$ \left(R^{\mathrm{chars}}_{\iota}\right) $
+        }
+    }
+
+    \vspace*{0.48cm}
+
+    \KwRet{$ F $}
+\end{algorithm}
+

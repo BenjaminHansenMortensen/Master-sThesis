@@ -1,0 +1,42 @@
+\refstepcounter{subsection}\subsection*{\thesubsection\quad Results}\label{subsec:DatabaseInitResults}
+
+The dominant time complexity stems from $ \Sort $, instantiated as bitonic sort \cite{Batcher68} , with a complexity of $ \BigO \left(n \log^2 \left( n \right)\right) $. It applies to both the client and server as they perform private swaps for all the required comparisons together. However, this is without parallelization. With parallelization, bitonic sort can achieve a time complexity of $ \BigO \left(\log^2 \left( n \right)\right) $, given that $ n $ is finite, which for our purposes is the case. The communication complexity, regardless of parallelization, is $ \BigO \left(n \log^2 \left( n \right)\right) $.
+
+Further, we instantiate $ \Encrypt $ with \acrshort{aes}, and implement the dummy records as arbitrary key streams of length $ \omega $. 
+
+\begin{figure}[H]
+    \caption{$ \PreProcess $ - Runtime}
+    \label{fig:preprocessRuntime}
+    \centering
+    \begin{tikzpicture}
+        \begin{axis}[
+            xlabel={Database size (\si{\mega\byte})},
+            ylabel={hours},
+            grid=major,
+            cycle list name=black white,
+        ]
+        
+
+        \addplot table {../Chapter Protocol/Database Setup/Data/preprocess.txt};
+        \end{axis}
+    \end{tikzpicture}
+\end{figure}
+
+The experiment implements bitonic sort without parallelization and the results are presented in \cref{fig:preprocessRuntime}. We find that within a time budget $  \tau $ of eight hours, we can preprocess a database of size 6.16 megabytes. Most of the runtime is spent performing private swaps in order to sort the database, and a single private swap takes on average 0.33 seconds and has 3.67 megabytes of data sent by the client and 3.67 megabytes of data sent by the server. 
+
+In Appendix \hyperref[apx:bitonicsortanalysis]{C}, we perform a deeper analysis of our implementation of the bitonic sort algorithm. The analysis reveals that the number of private swaps required to sort the permutation $ \pi $ of size $ n $ follows the sequence $ a(n) = \frac{n}{4} \cdot \left( \log^2_2 \left( n \right) + \log_2 \left( n \right) \right) $, without parallelization. We use this sequence and the average runtime of a private swap of 0.33 seconds, to approximate the total runtime for $ \PreProcess $. When we compare the approximated runtime, in seconds, to the experimental results a $ 10\% $ difference is revealed, attributed to the additional overhead by network and computational processes outside MP-SPDZ. 
+
+We therefore add this additional overhead to give a better approximation:
+
+\begin{gather*}
+    P(n) = \frac{5n}{54} \cdot \left( \log^2_2 \left( n \right) + \log_2 \left( n \right) \right)
+\end{gather*}
+
+With perfect parallelization the analysis shows that $ \PreProcess $ follows the sequence $ b(n) = \frac{1}{2} \cdot \left( \log^2_2 \left( n \right) + \log_2 \left( n \right) \right) $, which we combine with our overhead to give an approximation, assuming that a private swap takes 0.33 seconds. Note that the scalar does not encapsulate the overhead introduce by parallelization:
+
+\begin{gather*}
+    PP(n) = \frac{5}{27} \cdot \left( \log^2_2 \left( n \right) + \log_2 \left( n \right) \right)
+\end{gather*}
+
+We use $ PP(n) $ to estimate that a database length $ n = 2^{393} $ can be initiated within the time budget. That equates to a database size of approximately $ 1.21 \cdot 10^{122} $ bytes, a number so large even googol could not exhaust it. Let us be clear that this also would require $ 2^{393} $ parallel cores for processing and communication channels, making it infeasible with today's technology, but it shows that solutions that implement partial parallelization will most likely lie within the range of 6 to $ 1.21 \cdot 10^{116} $ megabytes.
+

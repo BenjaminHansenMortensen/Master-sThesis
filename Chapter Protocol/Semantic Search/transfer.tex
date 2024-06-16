@@ -1,0 +1,88 @@
+\refstepcounter{subsection}\subsection*{\thesubsection\quad Transfer}\label{subsec:SemanticSearchTransfer}
+
+\noindent
+\begin{figure} [H]
+    \begin{minipage}{0.5\textwidth}
+        \RestyleAlgo{ruled}
+        \begin{algorithm}[H]
+            \LinesNumbered
+            \caption{Client $ \mathcal{U} $ - \newline $ \Search $}
+            \label{algo:ClientSemanticSearch}
+            \KwIn{$ q' \gets \Gamma \left( q \right) $}
+            \KwOut{$ I $}
+    
+            \vspace*{0.48cm}
+    
+            \SetKwProg{MPC}{multi-party computation:}{}{end}
+            \MPC{} {
+    
+                \KwIn{$ q' $}
+            
+                \KwOut{$ I $}
+    
+                $ I \gets \left[ \phantom{=} \right] $
+    
+                \For{$ \left( \gamma_{\iota}, \iota \right) \mathrm{\phantom{|} in \phantom{|}} A $}{
+    
+                    $ \delta \gets \Distance \left( q', \gamma_{\iota} \right) $
+    
+                    \If{$ \delta < t $}{
+    
+                        $ I $.add$ \left( \iota \right) $
+    
+                    }
+    
+                } 
+    
+            }
+
+            \vspace*{0.48cm}
+    
+            \KwRet{$ I $}
+    
+        \end{algorithm}
+    \end{minipage}
+    \begin{minipage}{0.49\textwidth}
+        \RestyleAlgo{ruled}
+        \begin{algorithm}[H]
+            \LinesNumbered
+            \caption{Server - \newline $ \Search $}
+            \label{algo:ServerSemanticSearch}
+            \KwIn{$ A $ \phantom{$ q' \gets \Gamma \left( q \right) $}}
+            \KwOut{\phantom{$ I $}}
+    
+            \vspace*{0.48cm}
+        
+            \SetKwProg{MPC}{multi-party computation:}{}{end}
+            \MPC{} {
+    
+                \KwIn{$ A $ \phantom{$ q' $}}
+            
+                \KwOut{\phantom{$ I $}}
+    
+                $ I \gets \left[ \phantom{=} \right] $
+    
+                \For{$ \left( \gamma_{\iota}, \iota \right) \mathrm{\phantom{|} in \phantom{|}} A $}{
+    
+                    $ \delta \gets \Distance \left( q', \gamma_{\iota} \right) $
+    
+                    \If{$ \delta < t $}{
+    
+                        $ I $.add$ \left( \iota \right) $
+    
+                    }
+    
+                } 
+    
+            }
+
+            \vspace*{0.48cm}
+    
+            \KwRet{\phantom{$ I $}}
+    
+        \end{algorithm}
+    \end{minipage} 
+\end{figure}
+
+
+In the transfer, the client derives a vector embedding $ q' \gets \Gamma \left(q\right) $ for $ q $. With generic \acrshort{mpc}, it and the server calculate the distance $ \delta $ to all the embeddings $ \gamma_{\iota} $ in $ A $. If $ d \leq \tau $ then the index $ \iota $ is added $ I $ which is revealed to the client.

@@ -1,0 +1,64 @@
+\noindent
+\begin{figure} [H]
+    \centering
+    \captionsetup{justification=centering,margin=1cm}
+    \caption*{\hspace*{2.5cm}\textbf{\LARGE{Communication Flow}}}
+    \begin{tikzpicture}[auto,>=Triangle,font=\sffamily]
+        \node (server) {\Large Server};
+        \node[base left=8cm of server] (client) {\Large Client $ \mathcal{U} $};
+        \coordinate[below=14.79cm of server] (server_ground);
+        \coordinate[below=14.79cm of client] (client_ground);
+        
+        \begin{scope}[line width=3pt,shift={(client_ground)},
+            nodes={above}, draw=dark_gray, x={($(server_ground)-(client_ground)$)},y={($(client.south)-(client_ground)$)}]
+            \draw[] (1, 0.9) node (filter) {$ A \gets \Filter \left( \mathcal{U}, D \right) $};
+            \draw[] (0, 0.9) node (filter_receive) {\phantom{$ \left( A \right) $}};
+
+            \draw[] (1, 0.825) node (garble) {$ A' \gets \Garble \left( A, e_1, e_2, \dots, e_\aleph \right) $};
+            \draw[] (0, 0.825) node (garble_receive) {\phantom{$ \left( A' \right) $}};
+            \draw[ultra thick, -{Stealth[scale=1]}] (garble) -- (garble_receive);
+
+            \draw[line width=1pt, light_gray] (0.5, 1) -- (0.5, 0.825);
+
+            \draw[-, line width=2pt, shorten <=2pt, black] (1.2, 0.8) -- (-0.2, 0.8);
+
+            \draw[] (0.5, 0.7) node (title_garble) {\Large{$ \Garble $:}};
+
+            \node [shape=rectangle, align=center](table1) at (0.66, 0.415) {
+                \begin{tabular}{|c | c | c | c|}
+
+                    \multicolumn{1}{c}{ \hspace*{1ex} $ e_1 $ \hspace*{1ex}} & \multicolumn{1}{c}{$ \Encrypt\left( e_2, \Hash \left( v_j \right) \right) $} & \multicolumn{1}{c}{\dots} & \multicolumn{1}{c}{ $ \Encrypt\left( e_{\aleph}, \Hash \left( v_j \right) \right) $} \\ [1ex] 
+                    
+                    \hline \rule{0pt}{0.9\normalbaselineskip}
+                    $ \Hash\left(v_1\right) $ & $ \left[ \iota_{1, 1}, \iota_{1, 2}, \dots , \iota_{1, k}  \right] $ & $ \dots $ & $ x_1 $\\ [0.5ex]
+                    \hline \rule{0pt}{0.9\normalbaselineskip}
+                    $ \Hash\left(v_2\right) $ & $ \left[ \iota_{2, 1}, \iota_{2, 2}, \dots , \iota_{2, l}  \right] $ & $ \dots $ & $ x_2 $ \\ [0.5ex]
+                    \hline \rule{0pt}{0.9\normalbaselineskip}
+                    $ \dots $ & $ \dots $ & $ \dots $ & $ \dots $ \\ [0.5ex]
+                    \hline \rule{0pt}{0.9\normalbaselineskip}
+                    $ \Hash\left( v_\gimel \right) $ & $ \left[ \iota_{\gimel, 1}, \iota_{\gimel, 2}, \dots , \iota_{\gimel, o}  \right] $ & $ \dots $ & $ x_\gimel $ \\ [0.5ex] 
+                    \hline
+                \end{tabular}
+            };
+
+            \draw[] (-0.09, 0.615) node (title_key) {$\begin{tabular}{l}
+                Encryption Keys
+                \end{tabular}\bm{\big\{}$
+            };
+            \draw[] (-0.1, 0.53) node (title_inverted) {Inverted};
+            \draw[] (-0.1, 0.5) node (title_index) {Index};
+            \draw[] (-0.1, 0.47) node (title_matrix) {Matrix};
+            \draw[] (0.037, 0.41) node (title_key) {$\left.\begin{tabular}{l}
+                \\
+                \\
+                \\
+                \\
+                \\
+                \\
+                \end{tabular}\right\{$
+            };
+
+        \end{scope}
+    \end{tikzpicture}
+    \label{ill:KeywordSearchInitiation}
+\end{figure}

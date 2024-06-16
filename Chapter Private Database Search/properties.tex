@@ -1,0 +1,281 @@
+\newcommand{\Query}{\ensuremath{\mathsf{{query}}}}
+\newcommand{\Oracle}{\ensuremath{\mathsf{{Oracle}}}}
+\newcommand{\Adv}{\ensuremath{\mathsf{{Adv}}}}
+\section{Properties of a Private Database Search Protocol}
+\label{sec:PDSproperties}
+%\addcontentsline{toc}{section}{Properties of the protocol}
+
+The main challenge we face is that in \acrshort{ot}, the client inherently knows the records it wants to retrieve. We solve this by introducing a searching step where the client can search the database and obtain the indices of the records it is interested in. We identified that a \acrshort{psi} protocol can be used to achieve this functionality, which we implement with the $ \Search $ algorithm. To retrieve the records the $ \Encode $, $ \Retrieve $ and $ \Decode $ algorithms implement an \acrshort{ot} protocol that retrieves the corresponding records for the indices.
+
+To be precise about the functionality we desire we need to give descriptions of the properties of \acrshort{pds} protocols. Therefore, we take inspiration from the definitions of privacy and correctness \cite{CCS:Henry17} and introduce new descriptions for the adaptive, timely, access control, and storage imbalanced properties. 
+
+\refstepcounter{subsection}\subsection*{\thesubsection\quad Correctness}\label{subsec:Correctness}
+
+A protocol is correct if the client gets the files it searched for. To be more precise, we expect a protocol to succeed with a probability equal to or greater than some negligible function,
+
+\begin{equation*}
+    \Pr \left[ F \gets \Decode \left( F' \right) \hspace*{0.1cm} \middle| \hspace*{0.1cm}
+    \begin{aligned}
+        & \Xi \gets \Setup \left( D \right) \land \\
+        & A \gets \Filter \left( \mathcal{U}, D \right) \land \\
+        & I \gets \Search \left( A, q \right) \land \\
+        & I' \gets \Encode \left( I \right) \land \\
+        & F' \gets \Retrieve \left( D, I' \right)
+    \end{aligned} \right] \geq 1 - \mathcal{E} \left( \lambda \right)
+\end{equation*}
+
+
+\refstepcounter{subsection}\subsection*{\thesubsection\quad Privacy}\label{subsec:Privacy}
+
+The intuition of our privacy descriptions is that the client learns nothing more than the resulting records from the server and that the server learns nothing about the searches. We want the server, given a single transfer of a record, to have a probability of guessing which record was transferred equal to or less than $ \frac{1}{n} + \mathcal{E} \left( \lambda \right) $, where $ n $ is the database length and $ \mathcal{E} \left( \lambda \right) $ is a negligible function $ \mathcal{E}: \mathbb{N} \mapsto \mathbb{R}^+ $ describing the error probability.
+
+We base the idea of our privacy description on the fact that both the search and retrieval of records are deterministic. Synonymous with semantic security is the \acrshort{indcpa} game, but given that base assumption we modify the game by taking inspiration from the random oracle model. The resulting idea is that we have an adaptive game based approach, in the computational setting, where the adversary can query an encoding oracle which gives responses by running some algorithm or fetching them for previously seen queries. The core functionality of the game then simulates queries on some deterministic algorithm.
+
+\newcommand{\Garble}{\ensuremath{\mathsf{{Garble}}}}
+To describe privacy, we identify from \cref{fig:CommunicationFlow} that there are three exchanges, excluding $ \Setup $, between the client and the server for a single transfer. Therefore, we need three games to describe privacy. For simplicity, we introduce a new algorithm $ \Garble $ that supplements the functionality of $ \Filter $, which takes $ A $ as input, before it is sent to the client, and outputs the encoded auxiliary information $ A' $, which is sent to the client instead.
+
+\hfill
+
+\RestyleAlgo{ruled}
+\begin{algorithm} [H]
+    \LinesNumbered
+    \caption{Server Privacy - The Search}
+    \label{algo:ServerPrivacySearch}
+
+    \KwIn{The database $ D $}
+
+    \KwOut{Prediction $ \left( b = b' \right) $}
+
+    \vspace*{0.48cm}
+
+    $ \Xi \gets \Setup \left( D \right) $
+
+    $ \Oracle\left( \Xi \right) $
+
+    $ b' \gets \mathcal{A}^{\Oracle.\Query\left( A_i \right)} $
+
+    \KwRet{$ \left( b = b' \right) $}
+
+    \vspace*{0.48cm}
+
+    \SetKwProg{SO}{$ \Oracle \left( \Xi \right) $}{:}{end}
+    \SO{}{
+
+        $ H \gets \left[ \phantom{=} \right] $
+
+        $ b \overset{{\scriptscriptstyle\$}}{\gets} \lbrace 0, 1 \rbrace $
+
+        \SetKwProg{SOQ}{function}{ $ \Query\left(A_i\right) $:}{\KwRet{$ A'_i $}}
+        
+        \SOQ{} {
+            \eIf {$ A_i \mathrm{\phantom{|} in \phantom{|}} H $} {
+
+                $ A'_i \gets H $.get$ \left(A_i\right) $
+
+            }
+            {
+                \eIf {$ \left( b = 0 \right) $} {
+                    $ A'_i \gets \Garble \left( A_i \right) $
+                }
+                {
+                    \While {$ \$ \mathrm{\phantom{|} in \phantom{|}} H $} {
+                        $ \$ \overset{{\scriptscriptstyle\$}}{\gets} {\lbrace 0, 1 \rbrace}^{\rho} $
+                    }
+
+                    $ A'_i \gets \Garble \left( \$ \right) $
+                }
+    
+                $ H $.add$ \left( A_i, A'_i \right) $
+    
+            }
+
+        }
+
+    }
+\end{algorithm}
+
+\paragraph*{Server privacy in the search.}
+\cref{algo:ServerPrivacySearch} describes the server's privacy in the search of a \acrshort{pds} protocol. In it, a \acrshort{ppt} algorithm $ \mathcal{A} $ represents an adversary whose goal is to demonstrate an advantage in distinguishing results from an oracle $ \Oracle $, a \acrshort{ppt} algorithm. The oracle has a $ \Query $ functionality, which returns responses $ A'_i $ to a given auxiliary information $ A_i $. Responses are given based on the value of a bit $ b $ that the oracle picks upon initiation. If the bit is zero, the oracle returns a proper encoding of $ A_i $ by running $ \Garble $. If the bit is one, the oracle picks a random substitute $ \$ $ for the auxiliary information to run $ \Garble $ with instead. The oracle stores responses, which it gives in $ H $. If the oracle is queried for a previously seen query, it fetches the stored response from $ H $. Ultimately, the adversary gives its prediction $ b' $ to what value it believes the oracle's bit $ b $ has.
+
+The intuition is that if the adversary, in this case, the client, cannot derive any correlation from $ A_i $ to $ A'_i $, then the challenger, in this case, the server, perfectly hides $ A_i $ with $ \Garble $. Thereby enforcing the privacy of the database $ D $ in the search as $ A_i $ is derived from $ D $. It might seem weird to make this claim as we did not run the $ \Search $ algorithm, but we imagine that if $ \Search $ broke the server's privacy, then it also would be a valid strategy for the adversary, thus the privacy of $ \Search $ is also captured by this description.
+
+We say that the server's computational privacy holds in the search if the adversary $ \mathcal{A} $ has an advantage smaller than or equal to some negligible function.
+
+\begin{equation*}
+    \Adv^{\Search} \left( \mathcal{A} \right) = \left| 2 \cdot \Pr \left[ b = b' \right] - 1 \right| \leq \mathcal{E} \left( \lambda \right)
+\end{equation*}
+
+\paragraph*{Server privacy in the retrieval.}
+\cref{algo:ServerPrivacyRetrieve} describes the server's privacy in the retrieval of a \acrshort{pds} protocol. We follow the same setup as \cref{algo:ServerPrivacySearch}, with an $ \Oracle $ that has a $ \Query $ functionality. In this case the adversary $ \mathcal{A} $ chooses sets of indices $ I'_i $, of length $ \sigma $, that it queries the oracle with. The oracle then considers each index by itself, but with a constant value for $ b $, to either use it or a random substitute $ \$ $ in the $ \Retrieve $ algorithm. $ \Retrieve $ takes in the index $ \iota' $, or the substitute, together with the database $ D $ and outputs an encoded record $ f'_i $. This encoded record is a legitimate record in the database and is added to the set of encoded records $ F'_i $, where $ F'_i $ is the output the oracle gives to the adversary. Therefore, the oracle tests whether the adversary can distinguish if $ \Retrieve $ used the index or a random substitute to fetch a record on the database. Compared to the previous game the oracle uses an additional loop to consider each index separately which crucial to ensure that previously seen indices are fetched from the history of previous responses $ H $.
+
+The intuition is that if the adversary, in this case, the client, cannot derive any correlation from $ I'_i $ to $ F'_i $, then the challenger, in this case, the server, perfectly hides $ I'_i $ with $ \Retrieve $. Thereby enforcing the privacy of the database $ D $ in the retrieval as $ D $ is an input to $ \Retrieve $. Again, this might seem weird as the client can use $ \Decode $ to later decode the encoded records $ F'_i $, but if the client can infer if a record was retrieved using $ \iota' $ or $ \$ $ it can win with an advantage, showing that this description also captures the privacy of the retrieved records $ F_i $.
+
+We say that the server's computational privacy holds in the retrieval if the adversary $ \mathcal{A} $ has an advantage smaller than or equal to some negligible function.
+
+\begin{equation*}
+    \Adv^{\Search} \left( \mathcal{A} \right) = \left| 2 \cdot \Pr \left[ b = b' \right] - 1 \right| \leq \mathcal{E} \left( \lambda \right)
+\end{equation*}
+
+\RestyleAlgo{ruled}
+\begin{algorithm} [H]
+    \LinesNumbered
+    \caption{Server Privacy - The Retrieval}
+    \label{algo:ServerPrivacyRetrieve}
+
+    \KwIn{The database $ D $}
+
+    \KwOut{Prediction $ \left( b = b' \right) $}
+
+    \vspace*{0.48cm}
+
+    $ \Xi \gets \Setup \left( D \right) $
+
+    $ \Oracle\left( \Xi, D \right) $
+
+    $ b' \gets \mathcal{A}^{\Oracle.\Query\left( I'_i \right)} $
+
+    \KwRet{$ \left( b = b' \right) $}
+
+    \vspace*{0.48cm}
+
+    \SetKwProg{SO}{$ \Oracle \left( \Xi, D \right) $}{:}{end}
+    \SO{}{
+
+        $ H \gets \left[ \phantom{=} \right] $
+
+        $ b \overset{{\scriptscriptstyle\$}}{\gets} \lbrace 0, 1 \rbrace $
+
+        \SetKwProg{SOQ}{function}{ $ \Query\left( I'_i \right) $:}{\KwRet{$ F'_i $}}
+        
+        \SOQ{} {
+
+            $ F'_i \gets \lbrace \phantom{=} \rbrace $
+
+            \For {$ \iota' \mathrm{\phantom{|} in \phantom{|}} I'_i $}{
+                \eIf {$ \iota' \mathrm{\phantom{|} in \phantom{|}} H $} {
+
+                    $ f'_i \gets H $.get$ \left( \iota' \right) $
+
+                }
+                {
+                    \eIf {$ \left( b = 0 \right) $} {
+                        $ f'_i \gets \Retrieve \left( D, i' \right) $
+                    }
+                    {
+                        \While {$ \$ $ in $ H $} {
+                            $ \$ \overset{{\scriptscriptstyle\$}}{\gets} {\lbrace 1, 2, ... , n \rbrace} $
+                        }
+
+                        $ f'_i \gets \Retrieve \left( D, \$ \right) $
+                    }
+        
+                }
+
+                $ H $.add$ \left( \iota', f'_i \right) $
+
+                $ F'_i $.add$ \left( f'_i \right) $
+            }
+            
+        }
+
+    }
+\end{algorithm}
+
+\paragraph*{Client privacy in the protocol.}
+\cref{algo:ClientPrivacycPDS} describes the client's privacy in a \acrshort{pds} protocol. We use a similar setup as \cref{algo:ServerPrivacyRetrieve}, with an $ \Oracle $ that has a query functionality $ \Query $ that the adversary can submit sets of indices $ I_i $ to get responses for, but this time the oracle uses $ \Encode $ to derive a set of encoded indices $ I'_i $ for $ I_i $ or a random substitute $ \$ $. The adversary's goal is to try to distinguish if the response $ I'_i $ from the oracle was produced with $ I_i $ or a random substitute $ \$ $.
+
+The intuition is that if the adversary, in this case, the server, cannot derive any correlation from $ I_i $ to $ I'_i $, then the challenger, in this case, the client, perfectly hides $ I'_i $ with $ \Encode $. Thereby enforcing the privacy of its search query $ q_i $ in the protocol. Similar to the previous cases, this game captures the privacy of the $ \Retrieve $ algorithm even if it is not explicitly executed it is still a possible strategy for the adversary.
+
+\hfill
+
+\RestyleAlgo{ruled}
+\begin{algorithm} [H]
+    \LinesNumbered
+    \caption{Client Privacy - The Protocol}
+    \label{algo:ClientPrivacycPDS}
+
+    \KwIn{The database $ D $}
+
+    \KwOut{Prediction $ \left( b = b' \right) $}
+
+    \vspace*{0.48cm}
+
+    $ \Xi \gets \Setup \left( D \right) $
+
+    $ \Oracle\left( \Xi, D \right) $
+
+    $ b' \gets \mathcal{A}^{\Oracle.\Query\left( I_i \right)} $
+
+    \KwRet{$ \left( b = b' \right) $}
+
+    \vspace*{0.48cm}
+
+    \SetKwProg{SO}{$ \Oracle \left( \Xi, D \right) $}{:}{end}
+    \SO{}{
+
+        $ H \gets \left[ \phantom{=} \right] $
+
+        $ b \overset{{\scriptscriptstyle\$}}{\gets} \lbrace 0, 1 \rbrace $
+
+        \SetKwProg{SOQ}{function}{ $ \Query\left( I_i \right) $:}{\KwRet{$ I'_i $}}
+        
+        \SOQ{} {
+
+            $ I'_i \gets \lbrace \phantom{=} \rbrace $
+
+            \For {$ \iota \mathrm{\phantom{|} in \phantom{|}} I_i $}{
+                \eIf {$ \iota \mathrm{\phantom{|} in \phantom{|}} H $} {
+
+                    $ \iota' \gets H $.get$ \left( \iota \right) $
+
+                }
+                {
+                    \eIf {$ \left( b = 0 \right) $} {
+                        $ \iota' \gets \Encode \left( \iota \right) $
+                    }
+                    {
+                        \While {$ \$ \mathrm{\phantom{|} in \phantom{|}} H $} {
+                            $ \$ \overset{{\scriptscriptstyle\$}}{\gets} {\lbrace 1, 2, ... , n \rbrace} $
+                        }
+
+                        $ \iota' \gets \Encode \left( \$ \right) $
+                    }
+        
+                }
+
+                $ H $.add$ \left( \iota, \iota' \right) $
+
+                $ I'_i $.add$ \left( \iota' \right) $
+            }
+            
+        }
+
+    }
+\end{algorithm}
+
+\hfill
+
+We say that the client's computational privacy holds in the protocol if the adversary $ \mathcal{A} $ has an advantage smaller than or equal to some negligible function.
+
+\begin{equation*}
+    \Adv^{\Search} \left( \mathcal{A} \right) = \left| 2 \cdot \Pr \left[ b = b' \right] - 1 \right| \leq \mathcal{E} \left( \lambda \right)
+\end{equation*}
+
+\refstepcounter{subsection}\subsection*{\thesubsection\quad Storage Imbalance}\label{subsec:StorageImbalanace}
+
+The storage capacity of the client likely not be that of the server. Therefore, a protocol is storage imbalanced if the client's $ \kappa_C $ maximum required storage capacity at any given point in the protocol is a fraction of the server's storage capacity $ \kappa_S $. Giving us the storage imbalance bound $ \kappa_C \leq \frac{\kappa_S}{w} $, for some constant $ w \in \mathbb{Z}^+ $, where we describe protocols as $ c $-imbalanced to emphasize that the client requires $ c $ times as little storage as the server.
+
+\refstepcounter{subsection}\subsection*{\thesubsection\quad Timely}\label{subsec:Timely}
+
+For intelligence to be valuable, it has to be timely. We say that a protocol is timely if the initiation does not exceed some time budget $ \tau $ and each transfer exerts sublinear computation and communication complexity in the size of the database. 
+
+
+\refstepcounter{subsection}\subsection*{\thesubsection\quad Adaptive}\label{subsec:Adaptive}
+
+\newcommand{\OT}{\text{\acrshort{ot}}}
+Given a single execution of $ \Setup $, the client can adaptively choose its search $ q_i $ for $ k $ number of executions of $ \Search $, $ \Encode $, $ \Retrieve $ and $ \Decode $, where $ k \times l $ is the total number of records transferred. This implies that the number of records transferred in each round can vary $ n \geq \vert F \vert \geq 0 $ and that the set of \acrshort{pds} protocols is a subset of $ \OT^{n}_{k \times l} $ protocols.
+
+
+\refstepcounter{subsection}\subsection*{\thesubsection\quad Access Control with Non-Repudiation}\label{subsec:AccessControl}
+
+Recall that we assume that the involved parties are authenticated to each other. We say that a protocol has access control if, for the identity $ \mathcal{U} $, there exists a \acrshort{ppt} algorithm $ \Filter $ that takes $ \mathcal{U} $ and $ D $ as inputs, and outputs some auxiliary information $ A $ about the database such that the access control policy is enforceable. \footnote{This is a change to the common interpretation of access control in oblivious transfer protocols as we do allow the server to learn the identity of a client to enforce access control, but as a benefit, we now have non-repudiation of searches for the different identities which is a necessity for auditing the correctness of honest/semi-honest parties.}
